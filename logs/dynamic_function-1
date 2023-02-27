@@ -1,0 +1,11 @@
+Using security parameter 40
+Trying to run 128-bit computation
+Significant amount of unused triples of Z2^128. For more accurate benchmarks, consider reducing the batch size with -b.
+The following timing is inclusive preprocessing.
+Time = 0.382037 seconds 
+Data sent = 33.0395 MB in ~524 rounds (party 1)
+Global data sent = 66.0791 MB (all parties)
+This program might benefit from some protocol options.
+Consider adding the following at the beginning of 'dynamic_function.mpc':
+	program.use_trunc_pr = True
+	program.use_split(2)

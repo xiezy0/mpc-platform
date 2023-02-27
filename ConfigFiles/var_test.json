@@ -1,0 +1,42 @@
+{
+	"common": {
+		"task_id": "9466c99f408c491aabb80b6f4ea93a56",
+		"server": {
+			"0": "10.21.10.80:10014",
+			"1": "10.21.10.125:10010"
+		},
+		"data": {
+			"0": ["data.txt"],
+			"1": ["data.txt"]
+		},
+		"params": {
+			"sfix_precision_l": 16,
+			"sfix_precision_r": 64,
+			"float_precision": 10
+		},
+		"security_protocol": "mascot"
+	},
+	"compute": {
+		"n_party": 2,
+		"n_length_basic": 9,
+		"components": [{
+			"module": "std0",
+			"function": "std",
+			"data_len": [9, 2],
+			"input": ["data0-0", "data1-0"],
+			"output": "std0.output"
+		}, {
+			"module": "std1",
+			"function": "std",
+			"data_len": [9, 2],
+			"input": ["data0-0", "data1-0"],
+			"output": "std1.output"
+		}, {
+			"module": "mul2",
+			"function": "mul",
+			"data_len": [1, 1],
+			"input": ["std0.output", "std1.output"],
+			"output": "mul2.output"
+		}]
+	}
+}

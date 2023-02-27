@@ -1,0 +1,6 @@
+# i# -*- coding: utf-8 -*-
+
+WORKERS: 100
+MAX_TIME : 3600
+CACHE_MAX_LE3600TH : 20
+EXECUTE_MAX_LENGTH : 10

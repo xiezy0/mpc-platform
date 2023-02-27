@@ -1,0 +1,24 @@
+{
+
+	"n_party": 2,
+	"n_length_basic": 9,
+	"components": [{
+		"module": "std0",
+		"function": "std",
+		"data_len": [9, 2],
+		"input": ["data0-0", "data1-0"],
+		"output": "std0.output"
+	}, {
+		"module": "std1",
+		"function": "std",
+		"data_len": [9, 2],
+		"input": ["data2-0", "data1-0"],
+		"output": "std1.output"
+	}, {
+		"module": "mul2",
+		"function": "mul",
+		"data_len": [1, 1],
+		"input": ["std0.output", "std1.output"],
+		"output": "mul2.output"
+	}]
+}

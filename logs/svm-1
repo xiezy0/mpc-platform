@@ -1,0 +1,10 @@
+Using security parameter 40
+Trying to run 128-bit computation
+The following timing is inclusive preprocessing.
+Time = 111.231 seconds 
+Data sent = 18777.9 MB in ~244572 rounds (party 1)
+Global data sent = 37555.8 MB (all parties)
+This program might benefit from some protocol options.
+Consider adding the following at the beginning of 'svm.mpc':
+	program.use_trunc_pr = True
+	program.use_split(2)

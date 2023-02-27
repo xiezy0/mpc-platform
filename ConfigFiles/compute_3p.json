@@ -1,0 +1,30 @@
+{
+
+	"n_party": 3,
+	"n_length_basic": 2,
+	"components": [{
+		"module": "add0",
+		"function": "add",
+		"data_len": [2, 2],
+		"input": ["data0-0", "data1-0"],
+		"output": "add0.output"
+	}, {
+		"module": "mul0",
+		"function": "mul",
+		"data_len": [2, 2],
+		"input": ["add0.output", "data2-0"],
+		"output": "mul0.output"
+	}, {
+		"module": "sqrt0",
+		"function": "sqrt",
+		"data_len": [2],
+		"input": ["mul0.output"],
+		"output": "sqrt0.output"
+	},{
+		"module": "std0",
+		"function": "std",
+		"data_len": [2],
+		"input": ["sqrt0.output"],
+		"output": "std0.output"
+	}]
+}
