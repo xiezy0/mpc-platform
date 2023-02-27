@@ -35,7 +35,7 @@ class Scheduler(threading.Thread):
                 flag = self.__release()
                 if flag :
                     task = self.cache_queue.get(timeout=1)
-                    future = self.pool.submit(task.task_func, task.params)
+                    future = self.pool.submit(task.task_func, task.params, task.task_id)
                     task.setFuture(future)
                     self.task_map[task.task_id] = task
                 time.sleep(1)

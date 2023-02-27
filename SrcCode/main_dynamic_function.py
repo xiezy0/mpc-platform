@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-import sys
-import os
 from Compiler.library import *
 from SrcCode.Source.dynamic_function import DynamicVariables
 from Compiler.program import Program, defaults
-import json as js
 import subprocess
-import argparse
 
 
-def start_mpc(meta_js):
+def start_mpc(meta_js, taskId):
     opts = defaults()
     # Set the finite ring parameter gfr(2^128), namely increase more numbers.
     opts.ring = 128
@@ -26,8 +22,8 @@ def start_mpc(meta_js):
     p = config_mpc.get("party_index", 1)
     protocol = config_mpc.get("protocol", "semi2k")
     pn = config_ip.get("port_number", "6000")
-    dv = DynamicVariables(config_cpt)
-    res = dv.eval_formula()
+    dv = DynamicVariables(config_cpt, taskId)
+    dv.eval_formula()
     dv.print_res()
     prog.finalize()
     if sim_flag == 0:

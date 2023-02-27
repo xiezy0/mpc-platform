@@ -43,7 +43,7 @@ def server_log(logfile, logger_name="server"):
 
 class DynamicVariables(object):
 
-    def __init__(self, meta_js, task_id=8888):
+    def __init__(self, meta_js, task_id):
         # For loop has its parameter as n_threads. But the effect is unknown.
         self.n_threads = 16
         # Recording the feature dimension of each party.
@@ -85,11 +85,12 @@ class DynamicVariables(object):
                 if isinstance(key, str) is True and key[:5] == 'data' + str(i):
                     single_party_data_total_length += self.input_length_dict[key]
             party_data_length.append(single_party_data_total_length)
-        self.log.info(
-            '\n PLAYER 1 UPLOADS {} DATA; \n PLAYER 2 UPLOADS {} DATA \n'.format(
-                party_data_length[0],
-                party_data_length[1]))
-        # print('\n PLAYER 1 UPLOADS {} DATA; \n PLAYER 2 UPLOADS {} DATA \n'.format(party_data_length[0], party_data_length[1]))
+        # old logInfo
+        # self.log.info(
+        #     '\n PLAYER 1 UPLOADS {} DATA; \n PLAYER 2 UPLOADS {} DATA \n'.format(
+        #         party_data_length[0],
+        #         party_data_length[1]))
+
         for i in range(len(self.n_parties_list)):  # init variable
             party_i = self.n_parties_list[i]
             self.names['data' + str(party_i)] = sfix.Array(party_data_length[i])
@@ -142,7 +143,7 @@ class DynamicVariables(object):
         self.full_function_map = dict(self.basic_function_map, **self.statics_function_map_l1, **self.ai_function_map)
         self.num_basic = 0
         self.num_statics = 0
-        self.num_ai = 0 
+        self.num_ai = 0
         self.basic_func_list = []
         self.statcs_func_list = []
         self.ai_func_list = []
@@ -354,7 +355,7 @@ class DynamicVariables(object):
                     n_inputs = len(inputs)
                     if self.n_length_ai is None:
                         raise ValueError("NO INPUT AI DATA LENGTH")
-                    # from the front perspective, we allow the input data differ in length, but the joint SVC requires the data share the same length.                     
+                    # from the front perspective, we allow the input data differ in length, but the joint SVC requires the data share the same length.
                     vars = sfix.Tensor([len(sfunc["input"]), self.n_length_ai])
                     # we do not require the order of input training data, except that the last one MUST be labels.
                     for j in range(len(inputs)):
@@ -406,8 +407,8 @@ class DynamicVariables(object):
             for i in range(len(self.res_basic)):
                 print_ln('The result of step %s basic operation %s is : %s', i,
                         self.basic_func_list[i], self.res_basic[i].reveal())
-                # This log happens in the runtime which will not show the revealed result even though we take the .reveal()
-                # cmd
+                # This log happens in the runtime which will not show the revealed result even though we take the
+                # .reveal() cmd
                 self.log.info('The result of step %s basic operation %s is : %s' %
                             (i, self.basic_func_list[i], self.res_basic[i].reveal()))
         if self.res_statics is not None:

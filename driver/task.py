@@ -24,7 +24,7 @@ def generate_task_id():
 
 class Task(object):
     def __init__(self, task_name=None, task_func=None, params=None):
-        self.task_id = generate_task_id() 
+        self.task_id = generate_task_id()
         self.task_status = settings.RetCode.WAIT 
         self.task_name = task_name
         self.task_func = task_func
