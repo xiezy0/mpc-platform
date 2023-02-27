@@ -91,6 +91,8 @@ class DynamicVariables(object):
         #         party_data_length[0],
         #         party_data_length[1]))
 
+        self.log.info("start load data from {} party " .format(len(self.n_parties_list)))
+
         for i in range(len(self.n_parties_list)):  # init variable
             party_i = self.n_parties_list[i]
             self.names['data' + str(party_i)] = sfix.Array(party_data_length[i])
@@ -109,7 +111,7 @@ class DynamicVariables(object):
                            ] = self.names['data' + str(party_i)][upedge_list[j]:upedge_list[j+1]]
         ######################### read input ######################################################################
 
-        self.log.info("load data success ... ")
+        self.log.info("Success load data  ... ")
 
         self.statics_function_map_l1 = {
             "max": self.calc_max,
@@ -241,6 +243,7 @@ class DynamicVariables(object):
         # print(self.num_basic, self.n_length_basic)
         step_results_statics = sfix.Matrix(self.num_statics, self.n_length_statics_result)
         step_results_ai = sfix.Matrix(self.num_ai, self.d_ai)
+        self.log.info("start {} party compute" .format(len(self.n_parties_list)))
         for i in range(self.num_funcs):
             sfunc = funcs[i]
             func = sfunc['function']
@@ -403,6 +406,7 @@ class DynamicVariables(object):
         return self.res_statics, self.res_basic,self.res_ai
 
     def print_res(self):
+        self.log.info("begin open value")
         if self.res_basic is not None:
             for i in range(len(self.res_basic)):
                 print_ln('The result of step %s basic operation %s is : %s', i,
@@ -423,6 +427,9 @@ class DynamicVariables(object):
                         self.ai_func_list[i], self.res_ai[i].reveal())
                 self.log.info('The result of step %s ai operation %s is : %s' %
                             (i, self.ai_func_list[i], self.res_ai[i].reveal()))
+
+        self.log.info("open value success")
+        self.log.info("finish {} party compute" .format(len(self.n_parties_list)))
 
     @staticmethod
     def calc_max(var):

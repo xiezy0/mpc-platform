@@ -5,4 +5,4 @@ dynamic_function-0
 0
 /home/xiumaker/Documents/service/mpc-platform/start_server.py
 R:128
-opts: 
+opts: split edabit trunc_pr
