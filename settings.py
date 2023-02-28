@@ -10,18 +10,16 @@ sys.path.append(current_dir)
 ROOT = current_dir + "/server"
 
 IP = "0.0.0.0"
-PORT = 8103
-
+PORT = 8101
 
 MAX_TIME = 2
 WORKERS= 10
 ONLINE_POOL = None
 
-
 CACHE_MAX_LENGTH = 10
 EXECUTE_MAX_LENGTH = 2
 SCHEDULER_QUEUE = None
-EXECUTING_MAP = {} 
+EXECUTING_MAP = {}
 
 class GlobalVar(object):
     def __init__(self):
@@ -61,4 +59,3 @@ def server_log(logfile, logger_name="server"):
     log = logging.getLogger(logger_name)
     log.addHandler(time_log)
     return log
-

@@ -105,10 +105,10 @@ class DynamicVariables(object):
 
             for j in range(len(column_i)):
                 single_party_length_list.append(self.input_length_dict['data' + str(party_i) + '-' + str(column_i[j])])
-                self.names['data' + str(party_i) + '-' + str(column_i[j])] = sfix.Array(single_party_length_list[j+1])
+                self.names['data' + str(party_i) + '-' + str(column_i[j])] = sfix.Array(single_party_length_list[j + 1])
                 upedge_list.append(sum(single_party_length_list))
                 self.names['data' + str(party_i) + '-' + str(column_i[j])
-                           ] = self.names['data' + str(party_i)][upedge_list[j]:upedge_list[j+1]]
+                           ] = self.names['data' + str(party_i)][upedge_list[j]:upedge_list[j + 1]]
         ######################### read input ######################################################################
 
         self.log.info("Success load data  ... ")
@@ -294,6 +294,7 @@ class DynamicVariables(object):
                     else:
                         errmsg = 'NAME OF: {} is ILLEGAL INPUT'.format(inputs[j])
                         raise ValueError(errmsg)
+                self.log.info("start compute {} in {} party computation" .format(func, len(self.n_parties_list)))
                 result = self.full_function_map[sfunc["function"]](vars)
                 step_results_basic[count_basics] = result
                 count_basics += 1
@@ -340,6 +341,7 @@ class DynamicVariables(object):
                     else:
                         errmsg = 'NAME OF: {} is ILLEGAL INPUT'.format(inputs[j])
                         raise ValueError(errmsg)
+                self.log.info("start compute {} in {} party computation".format(func, len(self.n_parties_list)))
                 result = self.statics_function_map_l1[sfunc["function"]](total_ary)
 
                 step_results_statics[self.statics_module_dict[module]] = result
@@ -395,6 +397,7 @@ class DynamicVariables(object):
                         else:
                             errmsg = 'NAME OF: {} is ILLEGAL INPUT'.format(inputs[j])
                             raise ValueError(errmsg)
+                    self.log.info("start compute {} in {} party computation".format(func, len(self.n_parties_list)))
                     result = self.ai_function_map[sfunc["function"]](vars, meta_para)
                     step_results_ai[self.ai_module_dict[module]] = result
                     count_ai += 1
