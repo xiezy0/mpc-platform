@@ -41,6 +41,7 @@ function test_vm
 run_opts="$run_opts -B 5"
 
 export PORT=$((RANDOM%10000+10000))
+export BENCH=
 
 for dabit in ${dabit:-0 1 2}; do
     if [[ $dabit = 1 ]]; then
@@ -60,7 +61,7 @@ for dabit in ${dabit:-0 1 2}; do
 
     for i in rep-field shamir mal-rep-field ps-rep-field sy-rep-field \
 		       atlas mal-shamir sy-shamir hemi semi temi \
-		       soho mascot; do
+		       soho mascot mama; do
 	test_vm $i $run_opts
     done
 

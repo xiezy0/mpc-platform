@@ -1,3 +1,6 @@
+from Compiler.library import multithread, print_ln, crash
+from Compiler.types import sint, regint
+
 n = 1000000
 x = sint.Array(n)
 x.assign_vector(regint.inc(n))
@@ -5,6 +8,10 @@ x.assign_vector(regint.inc(n))
 @multithread(2, n)
 def _(base, size):
     x.assign_vector(x.get_vector(base, size) ** 2, base)
+
+print_ln('%s', x[2].reveal())
+crash(x[2].reveal() != 4)
+crash(x[n - 1].reveal() != (n - 1) ** 2)
 
 print_ln('%s', x[2].reveal())
 crash(x[2].reveal() != 4)

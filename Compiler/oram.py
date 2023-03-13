@@ -805,11 +805,11 @@ class RefTrivialORAM(EndRecursiveEviction):
 class TrivialORAM(RefTrivialORAM, AbstractORAM):
     """ Trivial ORAM (obviously). """
     ref_type = RefTrivialORAM
-    def __init__(self, size, value_type=sint, value_length=1, index_size=None, \
+    def __init__(self, size, value_type=None, value_length=1, index_size=None, \
                      entry_size=None, contiguous=True, init_rounds=-1):
         self.index_size = index_size or log2(size)
-        self.value_type = value_type
-        self.index_type = value_type.get_type(self.index_size)
+        self.value_type = value_type or sint
+        self.index_type = self.value_type.get_type(self.index_size)
         if entry_size is None:
             self.value_length = value_length
             self.entry_size = [None] * value_length
@@ -862,15 +862,16 @@ class LinearORAM(TrivialORAM):
         empty_entry = self.empty_entry(False)
         demux_array(bit_decompose(index, self.index_size), \
                     self.index_vector)
+        t = self.value_type.get_type(None if None in self.entry_size else max(self.entry_size))
         @map_sum(get_n_threads(self.size), n_parallel, self.size, \
-                     self.value_length + 1, [self.value_type.bit_type] + \
-                        [self.value_type.get_type(l) for l in self.entry_size])
+                     self.value_length + 1, t)
         def f(i):
             entry = self.ram[i]
             access_here = self.index_vector[i]
             return access_here * ValueTuple((entry.empty(),) + entry.x)
-        not_found = f()[0]
-        read_value = ValueTuple(f()[1:]) + not_found * empty_entry.x
+        not_found = self.value_type.bit_type(f()[0])
+        read_value = ValueTuple(self.value_type.get_type(l)(x) for l, x in zip(self.entry_size, f()[1:])) + \
+            not_found * empty_entry.x
         maybe_stop_timer(6)
         return read_value, not_found
     @method_block
@@ -879,7 +880,9 @@ class LinearORAM(TrivialORAM):
         empty_entry = self.empty_entry(False)
         demux_array(bit_decompose(index, self.index_size), \
                     self.index_vector)
-        new_value = make_array(new_value)
+        new_value = make_array(
+            new_value, self.value_type.get_type(
+                max(x or 0 for x in self.entry_size)))
         @for_range_multithread(get_n_threads(self.size), n_parallel, self.size)
         def f(i):
             entry = self.ram[i]
@@ -895,7 +898,9 @@ class LinearORAM(TrivialORAM):
         empty_entry = self.empty_entry(False)
         index_vector = \
             demux_array(bit_decompose(index, self.index_size))
-        new_value = make_array(new_value)
+        new_value = make_array(
+            new_value, self.value_type.get_type(
+                max(x or 0 for x in self.entry_size)))
         new_empty = MemValue(new_empty)
         write = MemValue(write)
         @map_sum(get_n_threads(self.size), n_parallel, self.size, \
@@ -1029,8 +1034,9 @@ def get_n_threads_for_tree(size):
 
 class TreeORAM(AbstractORAM):
     """ Tree ORAM. """
-    def __init__(self, size, value_type=sint, value_length=1, entry_size=None, \
+    def __init__(self, size, value_type=None, value_length=1, entry_size=None, \
                      bucket_oram=TrivialORAM, init_rounds=-1):
+        value_type = value_type or sint
         print('create oram of size', size)
         self.bucket_oram = bucket_oram
         # heuristic bucket size
@@ -1227,7 +1233,8 @@ class TreeORAM(AbstractORAM):
         """ Batch initalization. Obliviously shuffles and adds N entries to
             random leaf buckets. """
         m = len(values)
-        assert((m & (m-1)) == 0)
+        if not (m & (m-1)) == 0:
+            raise CompilerError('Batch size must a power of 2.')
         if m != self.size:
             raise CompilerError('Batch initialization must have N values.')
         if self.value_type != sint:
@@ -1675,6 +1682,39 @@ class OneLevelORAM(TreeORAM):
     pattern after one recursion. """
     index_structure = BaseORAMIndexStructure
 
+class BinaryORAM:
+    def __init__(self, size, value_type=None, **kwargs):
+        import circuit_oram
+        from Compiler.GC import types
+        n_bits = int(get_program().options.binary)
+        self.value_type = value_type or types.sbitintvec.get_type(n_bits)
+        self.index_type = self.value_type
+        oram_value_type = types.sbits.get_type(64)
+        if 'entry_size' not in kwargs:
+            kwargs['entry_size'] = n_bits
+        self.oram = circuit_oram.OptimalCircuitORAM(
+            size, value_type=oram_value_type, **kwargs)
+        self.size = size
+    def get_index(self, index):
+        return self.oram.value_type(self.index_type.conv(index).elements()[0])
+    def __setitem__(self, index, value):
+        value = list(self.oram.value_type(
+            self.value_type.conv(v).elements()[0]) for v in tuplify(value))
+        self.oram[self.get_index(index)] = value
+    def __getitem__(self, index):
+        value = self.oram[self.get_index(index)]
+        return untuplify(tuple(self.value_type(v) for v in tuplify(value)))
+    def read(self, index):
+        return self.oram.read(index)
+    def read_and_maybe_remove(self, index):
+        return self.oram.read_and_maybe_remove(index)
+    def access(self, *args):
+        return self.oram.access(*args)
+    def add(self, *args, **kwargs):
+        return self.oram.add(*args, **kwargs)
+    def delete(self, *args, **kwargs):
+        return self.oram.delete(*args, **kwargs)
+
 def OptimalORAM(size,*args,**kwargs):
     """ Create an ORAM instance suitable for the size based on
     experiments.
@@ -1683,6 +1723,10 @@ def OptimalORAM(size,*args,**kwargs):
     :param value_type: :py:class:`sint` (default) / :py:class:`sg2fn` /
       :py:class:`sfix`
     """
+    if not util.is_constant(size):
+        raise CompilerError('ORAM size has be a compile-time constant')
+    if get_program().options.binary:
+        return BinaryORAM(size, *args, **kwargs)
     if optimal_threshold is None:
         if n_threads == 1:
             threshold = 2**11
@@ -1731,6 +1775,12 @@ class OptimalPackedORAMWithEmpty(PackedORAMWithEmpty):
 def test_oram(oram_type, N, value_type=sint, iterations=100):
     stop_grind()
     oram = oram_type(N, value_type=value_type, entry_size=32, init_rounds=0)
+    test_oram_initialized(oram, iterations)
+    return oram
+
+def test_oram_initialized(oram, iterations=100):
+    N = oram.size
+    value_type = oram.value_type
     value_type = value_type.get_type(32)
     index_type = value_type.get_type(log2(N))
     start_grind()

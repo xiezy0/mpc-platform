@@ -3,6 +3,9 @@
  *
  */
 
+#ifndef PROTOCOLS_MALICIOUSREPPREP_HPP_
+#define PROTOCOLS_MALICIOUSREPPREP_HPP_
+
 #include "MaliciousRepPrep.h"
 #include "Tools/Subroutines.h"
 #include "Processor/OnlineOptions.h"
@@ -102,6 +105,7 @@ void MaliciousRepPrep<T>::buffer_triples()
 template<class T, class U>
 void sacrifice(const vector<array<T, 5>>& check_triples, Player& P)
 {
+    check_field_size<U>();
     vector<T> masked, checks;
     vector <typename T::open_type> opened;
     typename T::MAC_Check MC;
@@ -231,3 +235,5 @@ void MaliciousRepPrep<T>::buffer_inputs(int player)
     assert(proc);
     this->buffer_inputs_as_usual(player, proc);
 }
+
+#endif

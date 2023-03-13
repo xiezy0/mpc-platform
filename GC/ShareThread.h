@@ -7,11 +7,7 @@
 #define GC_SHARETHREAD_H_
 
 #include "Thread.h"
-#include "MaliciousRepSecret.h"
-#include "RepPrep.h"
-#include "SemiHonestRepPrep.h"
 #include "Processor/Data_Files.h"
-#include "Protocols/ReplicatedInput.h"
 
 #include <array>
 
@@ -42,8 +38,10 @@ public:
 
     void pre_run(Player& P, typename T::mac_key_type mac_key);
     void post_run();
+    void check();
 
     void and_(Processor<T>& processor, const vector<int>& args, bool repeat);
+    void andrsvec(Processor<T>& processor, const vector<int>& args);
     void xors(Processor<T>& processor, const vector<int>& args);
 };
 

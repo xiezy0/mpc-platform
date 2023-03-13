@@ -18,6 +18,16 @@ class TinyMC : public MAC_Check_Base<T>
     PointerVector<int> sizes;
 
 public:
+    static void setup(Player& P)
+    {
+        T::part_type::MAC_Check::setup(P);
+    }
+
+    static void teardown()
+    {
+        T::part_type::MAC_Check::teardown();
+    }
+
     TinyMC(typename T::mac_key_type mac_key) :
             part_MC(mac_key)
     {
@@ -36,7 +46,7 @@ public:
         sizes.reserve(n);
     }
 
-    void prepare_open(const T& secret)
+    void prepare_open(const T& secret, int = -1)
     {
         for (auto& part : secret.get_regs())
             part_MC.prepare_open(part);

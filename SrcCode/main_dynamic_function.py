@@ -29,8 +29,8 @@ def start_mpc(meta_js, taskId):
     if sim_flag == 0:
         command = './%s-party.x ' \
                   '-N %d -p %d ' \
-                  '-IF Player-Data/Input -OF Player-Data/Public-Output ' \
-                  '--ip-file-name ConfigFiles/IPConfig_%dp -e ' \
+                  '-IF Player-Data/Input -OF Player-Data/Public-Output -e ' \
+                  '--ip-file-name ConfigFiles/IPConfig_%dp ' \
                   '-pn %d ' % (protocol, n_p, p, n_p, pn) \
                   + program_name
         print(command)

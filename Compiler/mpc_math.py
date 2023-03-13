@@ -8,6 +8,8 @@ This has to imported explicitly.
 
 
 import math
+import operator
+from functools import reduce
 from Compiler import floatingpoint
 from Compiler import types
 from Compiler import comparison
@@ -295,7 +297,6 @@ def exp2_fx(a, zero_output=False, as19=False):
         intbitint = types.intbitint
         n_shift = int(types.program.options.ring) - a.k
         if types.program.use_split():
-            assert not zero_output
             from Compiler.GC.types import sbitvec
             if types.program.use_split() == 3:
                 x = a.v.split_to_two_summands(a.k)
@@ -327,6 +328,7 @@ def exp2_fx(a, zero_output=False, as19=False):
                 s = sint.conv(bits[-1])
                 lower = sint.bit_compose(sint.conv(b) for b in bits[:a.f])
             higher_bits = bits[a.f:n_bits]
+            bits_to_check = bits[n_bits:-1]
         else:
             if types.program.use_edabit():
                 l = sint.get_edabit(a.f, True)
@@ -338,7 +340,7 @@ def exp2_fx(a, zero_output=False, as19=False):
                 r_bits = [sint.get_random_bit() for i in range(a.k)]
                 r = sint.bit_compose(r_bits)
                 lower_r = sint.bit_compose(r_bits[:a.f])
-            shifted = ((a.v - r) << n_shift).reveal()
+            shifted = ((a.v - r) << n_shift).reveal(False)
             masked_bits = (shifted >> n_shift).bit_decompose(a.k)
             lower_overflow = comparison.CarryOutRaw(masked_bits[a.f-1::-1],
                                 r_bits[a.f-1::-1])
@@ -398,6 +400,36 @@ def exp2_fx(a, zero_output=False, as19=False):
         return s.if_else(1 / g, g)
 
 
+def mux_exp(x, y, block_size=8):
+    assert util.is_constant_float(x)
+    from Compiler.GC.types import sbitvec, sbits
+    bits = sbitvec.from_vec(y.v.bit_decompose(y.k, maybe_mixed=True)).v
+    sign = bits[-1]
+    m = math.log(2 ** (y.k - y.f - 1), x)
+    del bits[int(math.ceil(math.log(m, 2))) + y.f:]
+    parts = []
+    for i in range(0, len(bits), block_size):
+        one_hot = sbitvec.from_vec(bits[i:i + block_size]).demux().v
+        exp = []
+        try:
+            for j in range(len(one_hot)):
+                exp.append(types.cfix.int_rep(x ** (j * 2 ** (i - y.f)), y.f))
+        except OverflowError:
+            pass
+        exp = list(filter(lambda x: x < 2 ** (y.k - 1), exp))
+        bin_part = [0] * max(x.bit_length() for x in exp)
+        for j in range(len(bin_part)):
+            for k, (a, b) in enumerate(zip(one_hot, exp)):
+                bin_part[j] ^= a if util.bit_decompose(b, len(bin_part))[j] \
+                    else 0
+            if util.is_zero(bin_part[j]):
+                bin_part[j] = sbits.get_type(y.size)(0)
+            if i == 0:
+                bin_part[j] = sign.if_else(0, bin_part[j])
+        parts.append(y._new(y.int_type(sbitvec.from_vec(bin_part))))
+    return util.tree_reduce(operator.mul, parts)
+
+
 @types.vectorize
 @instructions_base.sfix_cisc
 def log2_fx(x, use_division=True):
@@ -420,6 +452,8 @@ def log2_fx(x, use_division=True):
         p -= x.f
         vlen = x.f
         v = x._new(v, k=x.k, f=x.f)
+    elif isinstance(x, types._register):
+        return log2_fx(types.sfix(x), use_division)
     else:
         d = types.sfloat(x)
         v, p, vlen = d.v, d.p, d.vlen
@@ -501,7 +535,7 @@ def abs_fx(x):
 #
 # @return floored sint value of x
 def floor_fx(x):
-    return load_sint(floatingpoint.Trunc(x.v, x.k - x.f, x.f, x.kappa), type(x))
+    return load_sint(floatingpoint.Trunc(x.v, x.k, x.f, x.kappa), type(x))
 
 
 ### sqrt methods

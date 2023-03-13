@@ -1,212 +1,178 @@
-[2023-02-27 13:42:30,030][INFO][server] - server initialize ... 
-[2023-02-27 13:42:30,031][INFO][server] - server start 
-[2023-02-27 13:43:04,661][INFO][server] - initialize ...
-[2023-02-27 13:43:04,662][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:43:04,662][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:43:04,663][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:43:04,663][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:43:04,664][INFO][server] - load data success ... 
-[2023-02-27 13:43:04,665][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:45:09,698][INFO][server] - server initialize ... 
-[2023-02-27 13:45:09,699][INFO][server] - server start 
-[2023-02-27 13:45:19,140][INFO][server] - initialize ...
-[2023-02-27 13:45:19,141][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:45:19,142][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:45:19,142][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:45:19,142][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:45:19,143][INFO][server] - load data success ... 
-[2023-02-27 13:45:19,144][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:47:54,321][INFO][server] - server initialize ... 
-[2023-02-27 13:47:54,325][INFO][server] - server start 
-[2023-02-27 13:48:02,013][INFO][server] - initialize ...
-[2023-02-27 13:48:02,013][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:48:02,014][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:48:02,014][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:48:02,014][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:48:02,014][INFO][server] - load data success ... 
-[2023-02-27 13:48:02,017][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:50:20,673][INFO][server] - server initialize ... 
-[2023-02-27 13:50:20,674][INFO][server] - server start 
-[2023-02-27 13:51:06,752][INFO][server] - initialize ...
-[2023-02-27 13:51:06,752][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:51:06,752][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:51:06,753][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:51:06,753][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:51:06,753][INFO][server] - load data success ... 
-[2023-02-27 13:51:06,756][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:53:08,112][INFO][server] - server initialize ... 
-[2023-02-27 13:53:08,112][INFO][server] - server start 
-[2023-02-27 13:53:21,793][INFO][server] - initialize ...
-[2023-02-27 13:53:21,793][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:53:21,794][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:53:21,794][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:53:21,794][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:53:21,794][INFO][server] - load data success ... 
-[2023-02-27 13:53:21,796][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:54:45,667][INFO][server] - server initialize ... 
-[2023-02-27 13:54:45,667][INFO][server] - server start 
-[2023-02-27 13:54:54,046][INFO][server] - initialize ...
-[2023-02-27 13:54:54,046][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:54:54,046][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:54:54,046][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:54:54,047][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:54:54,047][INFO][server] - load data success ... 
-[2023-02-27 13:54:54,048][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:55:47,947][INFO][server] - initialize ...
-[2023-02-27 13:55:47,947][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:55:47,948][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:55:47,948][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:55:47,948][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:55:47,948][INFO][server] - load data success ... 
-[2023-02-27 13:55:47,950][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:56:48,544][INFO][server] - server initialize ... 
-[2023-02-27 13:56:48,544][INFO][server] - server start 
-[2023-02-27 13:56:58,421][INFO][server] - server initialize ... 
-[2023-02-27 13:56:58,422][INFO][server] - server start 
-[2023-02-27 13:57:02,975][INFO][server] - server initialize ... 
-[2023-02-27 13:57:02,976][INFO][server] - server start 
-[2023-02-27 13:57:23,169][INFO][server] - server initialize ... 
-[2023-02-27 13:57:23,170][INFO][server] - server start 
-[2023-02-27 13:57:31,538][INFO][server] - initialize ...
-[2023-02-27 13:57:31,538][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:57:31,539][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:57:31,539][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:57:31,539][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:57:31,539][INFO][server] - load data success ... 
-[2023-02-27 13:57:31,541][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 13:58:36,831][INFO][server] - server initialize ... 
-[2023-02-27 13:58:36,831][INFO][server] - server start 
-[2023-02-27 13:58:41,859][INFO][server] - server initialize ... 
-[2023-02-27 13:58:41,860][INFO][server] - server start 
-[2023-02-27 13:58:51,738][INFO][server] - server initialize ... 
-[2023-02-27 13:58:51,738][INFO][server] - server start 
-[2023-02-27 13:59:00,953][INFO][server] - initialize ...
-[2023-02-27 13:59:00,953][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 13:59:00,954][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 13:59:00,954][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 13:59:00,954][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 13:59:00,955][INFO][server] - load data success ... 
-[2023-02-27 13:59:00,957][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 14:00:04,189][INFO][server] - server initialize ... 
-[2023-02-27 14:00:04,190][INFO][server] - server start 
-[2023-02-27 14:00:40,829][INFO][server] - initialize ...
-[2023-02-27 14:00:40,829][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 14:00:40,830][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 14:00:40,830][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 14:00:40,830][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 14:00:40,830][INFO][server] - load data success ... 
-[2023-02-27 14:00:40,833][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 14:01:26,489][INFO][server] - server initialize ... 
-[2023-02-27 14:01:26,491][INFO][server] - server start 
-[2023-02-27 14:01:48,094][INFO][server] - initialize ...
-[2023-02-27 14:01:48,094][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 14:01:48,095][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 14:01:48,095][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 14:01:48,095][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 14:01:48,095][INFO][server] - load data success ... 
-[2023-02-27 14:01:48,097][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 14:06:08,906][INFO][server] - initialize ...
-[2023-02-27 14:06:08,908][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 14:06:08,915][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 14:06:09,007][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 14:06:09,008][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 14:06:09,008][INFO][server] - load data success ... 
-[2023-02-27 14:06:09,050][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 14:08:31,163][INFO][server] - server initialize ... 
-[2023-02-27 14:08:31,164][INFO][server] - server start 
-[2023-02-27 14:08:43,054][INFO][server] - server initialize ... 
-[2023-02-27 14:08:43,063][INFO][server] - server start 
-[2023-02-27 14:09:04,854][INFO][server] - initialize ...
-[2023-02-27 14:09:04,856][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 14:09:04,857][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 14:09:04,859][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 14:09:04,859][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 14:09:04,859][INFO][server] - load data success ... 
-[2023-02-27 14:09:04,883][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 14:40:00,914][INFO][server] - server initialize ... 
-[2023-02-27 14:40:00,915][INFO][server] - server start 
-[2023-02-27 14:40:06,357][INFO][server] - server initialize ... 
-[2023-02-27 14:40:06,358][INFO][server] - server start 
-[2023-02-27 14:40:10,349][INFO][server] - server initialize ... 
-[2023-02-27 14:40:10,349][INFO][server] - server start 
-[2023-02-27 14:40:19,244][INFO][server] - initialize ...
-[2023-02-27 14:40:19,244][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 14:40:19,245][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 14:40:19,245][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 14:40:19,245][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 14:40:19,245][INFO][server] - load data success ... 
-[2023-02-27 14:40:19,246][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 15:57:56,656][INFO][server] - initialize ...
-[2023-02-27 15:57:56,659][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 15:57:56,712][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 15:57:56,713][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 15:57:56,715][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 15:57:56,715][INFO][server] - load data success ... 
-[2023-02-27 15:57:56,757][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 15:59:20,970][INFO][server] - server initialize ... 
-[2023-02-27 15:59:20,971][INFO][server] - server start 
-[2023-02-27 15:59:29,704][INFO][server] - initialize ...
-[2023-02-27 15:59:29,704][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 15:59:29,705][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 15:59:29,705][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 15:59:29,705][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 15:59:29,705][INFO][server] - load data success ... 
-[2023-02-27 15:59:29,708][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
-[2023-02-27 16:09:13,911][INFO][server] - initialize ...
-[2023-02-27 16:09:13,911][INFO][server] - 
- PLAYER 1 UPLOADS 1 DATA; 
- PLAYER 2 UPLOADS 1 DATA 
-
-[2023-02-27 16:09:13,912][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
-[2023-02-27 16:09:13,912][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
-[2023-02-27 16:09:13,912][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
-[2023-02-27 16:09:13,912][INFO][server] - load data success ... 
-[2023-02-27 16:09:13,914][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 09:38:10,119][INFO][server] - server initialize ... 
+[2023-03-13 09:38:10,127][INFO][server] - server start 
+[2023-03-13 09:58:42,486][INFO][server] - server initialize ... 
+[2023-03-13 09:58:42,487][INFO][server] - server start 
+[2023-03-13 09:58:46,433][INFO][server] - initialize ...
+[2023-03-13 09:58:46,433][INFO][server] - start load data from 3 party 
+[2023-03-13 09:58:46,434][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 09:58:46,435][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 09:58:46,435][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 09:58:46,436][INFO][server] - Success load data  ... 
+[2023-03-13 09:58:46,436][INFO][server] - start 3 party compute
+[2023-03-13 09:58:46,438][INFO][server] - start compute add in 3 party computation
+[2023-03-13 09:58:46,441][INFO][server] - begin open value
+[2023-03-13 09:58:46,443][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 09:58:46,443][INFO][server] - open value success
+[2023-03-13 09:58:46,444][INFO][server] - finish 3 party compute
+[2023-03-13 10:04:12,486][INFO][server] - server initialize ... 
+[2023-03-13 10:04:12,486][INFO][server] - server start 
+[2023-03-13 10:04:34,269][INFO][server] - initialize ...
+[2023-03-13 10:04:34,269][INFO][server] - start load data from 3 party 
+[2023-03-13 10:04:34,269][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 10:04:34,270][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 10:04:34,270][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 10:04:34,270][INFO][server] - Success load data  ... 
+[2023-03-13 10:04:34,270][INFO][server] - start 3 party compute
+[2023-03-13 10:04:34,270][INFO][server] - start compute add in 3 party computation
+[2023-03-13 10:04:34,271][INFO][server] - begin open value
+[2023-03-13 10:04:34,272][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 10:04:34,272][INFO][server] - open value success
+[2023-03-13 10:04:34,272][INFO][server] - finish 3 party compute
+[2023-03-13 10:42:17,753][INFO][server] - server initialize ... 
+[2023-03-13 10:42:17,754][INFO][server] - server start 
+[2023-03-13 10:42:56,574][INFO][server] - initialize ...
+[2023-03-13 10:42:56,574][INFO][server] - start load data from 3 party 
+[2023-03-13 10:42:56,574][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 10:42:56,575][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 10:42:56,575][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 10:42:56,576][INFO][server] - Success load data  ... 
+[2023-03-13 10:42:56,576][INFO][server] - start 3 party compute
+[2023-03-13 10:42:56,576][INFO][server] - start compute add in 3 party computation
+[2023-03-13 10:42:56,577][INFO][server] - begin open value
+[2023-03-13 10:42:56,578][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 10:42:56,578][INFO][server] - open value success
+[2023-03-13 10:42:56,578][INFO][server] - finish 3 party compute
+[2023-03-13 10:44:05,521][INFO][server] - server initialize ... 
+[2023-03-13 10:44:05,522][INFO][server] - server start 
+[2023-03-13 10:44:09,940][INFO][server] - initialize ...
+[2023-03-13 10:44:09,940][INFO][server] - start load data from 3 party 
+[2023-03-13 10:44:09,940][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 10:44:09,941][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 10:44:09,941][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 10:44:09,941][INFO][server] - Success load data  ... 
+[2023-03-13 10:44:09,941][INFO][server] - start 3 party compute
+[2023-03-13 10:44:09,942][INFO][server] - start compute add in 3 party computation
+[2023-03-13 10:44:09,942][INFO][server] - begin open value
+[2023-03-13 10:44:09,943][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 10:44:09,943][INFO][server] - open value success
+[2023-03-13 10:44:09,943][INFO][server] - finish 3 party compute
+[2023-03-13 11:14:51,294][INFO][server] - server initialize ... 
+[2023-03-13 11:14:51,296][INFO][server] - server start 
+[2023-03-13 11:15:01,619][INFO][server] - initialize ...
+[2023-03-13 11:15:01,619][INFO][server] - start load data from 3 party 
+[2023-03-13 11:15:01,619][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 11:15:01,620][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 11:15:01,621][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 11:15:01,621][INFO][server] - Success load data  ... 
+[2023-03-13 11:15:01,622][INFO][server] - start 3 party compute
+[2023-03-13 11:15:01,622][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:15:01,623][INFO][server] - begin open value
+[2023-03-13 11:15:01,624][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 11:15:01,624][INFO][server] - open value success
+[2023-03-13 11:15:01,624][INFO][server] - finish 3 party compute
+[2023-03-13 11:16:32,955][INFO][server] - initialize ...
+[2023-03-13 11:16:32,955][INFO][server] - start load data from 3 party 
+[2023-03-13 11:16:32,956][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 10000 at 8192
+[2023-03-13 11:16:32,956][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 10000 at 28192
+[2023-03-13 11:16:32,956][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 10000 at 48192
+[2023-03-13 11:16:32,956][INFO][server] - Success load data  ... 
+[2023-03-13 11:16:32,957][INFO][server] - start 3 party compute
+[2023-03-13 11:16:32,957][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:16:32,957][INFO][server] - begin open value
+[2023-03-13 11:16:34,246][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 10000 at 18192
+[2023-03-13 11:16:34,246][INFO][server] - open value success
+[2023-03-13 11:16:34,246][INFO][server] - finish 3 party compute
+[2023-03-13 11:20:03,977][INFO][server] - server initialize ... 
+[2023-03-13 11:20:03,978][INFO][server] - server start 
+[2023-03-13 11:20:11,030][INFO][server] - initialize ...
+[2023-03-13 11:20:11,030][INFO][server] - start load data from 3 party 
+[2023-03-13 11:20:11,030][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 10000 at 8192
+[2023-03-13 11:20:11,031][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 10000 at 28192
+[2023-03-13 11:20:11,032][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 10000 at 48192
+[2023-03-13 11:20:11,032][INFO][server] - Success load data  ... 
+[2023-03-13 11:20:11,032][INFO][server] - start 3 party compute
+[2023-03-13 11:20:11,033][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:20:11,034][INFO][server] - begin open value
+[2023-03-13 11:20:12,604][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 10000 at 18192
+[2023-03-13 11:20:12,604][INFO][server] - open value success
+[2023-03-13 11:20:12,604][INFO][server] - finish 3 party compute
+[2023-03-13 11:23:14,964][INFO][server] - initialize ...
+[2023-03-13 11:23:14,964][INFO][server] - start load data from 3 party 
+[2023-03-13 11:23:14,964][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 4000 at 8192
+[2023-03-13 11:23:14,965][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 4000 at 16192
+[2023-03-13 11:23:14,965][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 4000 at 24192
+[2023-03-13 11:23:14,965][INFO][server] - Success load data  ... 
+[2023-03-13 11:23:14,966][INFO][server] - start 3 party compute
+[2023-03-13 11:23:14,966][INFO][server] - start compute mul in 3 party computation
+[2023-03-13 11:23:16,696][INFO][server] - begin open value
+[2023-03-13 11:23:17,380][INFO][server] - The result of step 0 basic operation mul is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 4000 at 12192
+[2023-03-13 11:23:17,380][INFO][server] - open value success
+[2023-03-13 11:23:17,380][INFO][server] - finish 3 party compute
+[2023-03-13 11:27:21,685][INFO][server] - initialize ...
+[2023-03-13 11:27:21,686][INFO][server] - start load data from 3 party 
+[2023-03-13 11:27:21,686][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 11:27:21,686][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 11:27:21,687][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 11:27:21,687][INFO][server] - Success load data  ... 
+[2023-03-13 11:27:21,687][INFO][server] - start 3 party compute
+[2023-03-13 11:27:21,688][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:27:21,689][INFO][server] - begin open value
+[2023-03-13 11:27:21,691][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 11:27:21,692][INFO][server] - open value success
+[2023-03-13 11:27:21,692][INFO][server] - finish 3 party compute
+[2023-03-13 11:28:18,935][INFO][server] - server initialize ... 
+[2023-03-13 11:28:18,935][INFO][server] - server start 
+[2023-03-13 11:28:22,917][INFO][server] - initialize ...
+[2023-03-13 11:28:22,917][INFO][server] - start load data from 3 party 
+[2023-03-13 11:28:22,917][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 11:28:22,917][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 11:28:22,918][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 11:28:22,918][INFO][server] - Success load data  ... 
+[2023-03-13 11:28:22,918][INFO][server] - start 3 party compute
+[2023-03-13 11:28:22,918][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:28:22,919][INFO][server] - begin open value
+[2023-03-13 11:28:22,920][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 11:28:22,920][INFO][server] - open value success
+[2023-03-13 11:28:22,920][INFO][server] - finish 3 party compute
+[2023-03-13 11:29:13,065][INFO][server] - initialize ...
+[2023-03-13 11:29:13,065][INFO][server] - start load data from 3 party 
+[2023-03-13 11:29:13,065][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 11:29:13,066][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 11:29:13,066][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 11:29:13,066][INFO][server] - Success load data  ... 
+[2023-03-13 11:29:13,066][INFO][server] - start 3 party compute
+[2023-03-13 11:29:13,066][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:29:13,067][INFO][server] - begin open value
+[2023-03-13 11:29:13,068][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 11:29:13,068][INFO][server] - open value success
+[2023-03-13 11:29:13,068][INFO][server] - finish 3 party compute
+[2023-03-13 11:40:18,690][INFO][server] - server initialize ... 
+[2023-03-13 11:40:18,690][INFO][server] - server start 
+[2023-03-13 11:40:26,813][INFO][server] - initialize ...
+[2023-03-13 11:40:26,813][INFO][server] - start load data from 3 party 
+[2023-03-13 11:40:26,813][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1 at 8192
+[2023-03-13 11:40:26,814][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1 at 8194
+[2023-03-13 11:40:26,814][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1 at 8196
+[2023-03-13 11:40:26,814][INFO][server] - Success load data  ... 
+[2023-03-13 11:40:26,814][INFO][server] - start 3 party compute
+[2023-03-13 11:40:26,814][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:40:26,815][INFO][server] - begin open value
+[2023-03-13 11:40:26,816][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1 at 8193
+[2023-03-13 11:40:26,816][INFO][server] - open value success
+[2023-03-13 11:40:26,816][INFO][server] - finish 3 party compute
+[2023-03-13 11:41:42,323][INFO][server] - initialize ...
+[2023-03-13 11:41:42,323][INFO][server] - start load data from 3 party 
+[2023-03-13 11:41:42,324][INFO][server] - load data from party 0, data: <class 'Compiler.types.sfix'> array of length 1000 at 8192
+[2023-03-13 11:41:42,324][INFO][server] - load data from party 1, data: <class 'Compiler.types.sfix'> array of length 1000 at 10192
+[2023-03-13 11:41:42,324][INFO][server] - load data from party 2, data: <class 'Compiler.types.sfix'> array of length 1000 at 12192
+[2023-03-13 11:41:42,324][INFO][server] - Success load data  ... 
+[2023-03-13 11:41:42,325][INFO][server] - start 3 party compute
+[2023-03-13 11:41:42,325][INFO][server] - start compute add in 3 party computation
+[2023-03-13 11:41:42,326][INFO][server] - begin open value
+[2023-03-13 11:41:42,475][INFO][server] - The result of step 0 basic operation add is : <class 'Compiler.types._fix.reveal.<locals>.revealed_fix'> array of length 1000 at 9192
+[2023-03-13 11:41:42,476][INFO][server] - open value success
+[2023-03-13 11:41:42,476][INFO][server] - finish 3 party compute
+[2023-03-13 13:10:55,478][INFO][server] - server initialize ... 
+[2023-03-13 13:10:55,482][INFO][server] - server start 
+[2023-03-13 13:27:26,431][INFO][server] - server initialize ... 
+[2023-03-13 13:27:26,432][INFO][server] - server start 

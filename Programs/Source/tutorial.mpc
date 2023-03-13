@@ -1,4 +1,8 @@
 # sint: secret integers
+# from Compiler.library import print_ln, for_range, print_float_precision, for_range_opt, if_e, else_
+# from Compiler.types import sint, Array, sfix, Matrix
+from Compiler.library import print_ln
+from Compiler.types import sint, Array
 
 # you can assign public numbers to sint
 

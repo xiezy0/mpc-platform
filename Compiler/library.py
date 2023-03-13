@@ -64,6 +64,7 @@ def print_str(s, *args):
     variables/registers with ``%s``. """
     def print_plain_str(ss):
         """ Print a plain string (no custom formatting options) """
+        ss = bytearray(ss, 'utf8')
         i = 1
         while 4*i <= len(ss):
             print_char4(ss[4*(i-1):4*i])
@@ -138,7 +139,7 @@ def print_str_if(cond, ss, *args):
     """ Print string conditionally. See :py:func:`print_ln_if` for details. """
     if util.is_constant(cond):
         if cond:
-            print_ln(ss, *args)
+            print_str(ss, *args)
     else:
         subs = ss.split('%s')
         assert len(subs) == len(args) + 1
@@ -154,7 +155,8 @@ def print_str_if(cond, ss, *args):
                         print_str_if(cond, *_expand_to_print(val))
                     else:
                         print_str_if(cond, str(val))
-            s += '\0' * ((-len(s)) % 4)
+            s = bytearray(s, 'utf8')
+            s += b'\0' * ((-len(s)) % 4)
             while s:
                 cond.print_if(s[:4])
                 s = s[4:]
@@ -243,6 +245,10 @@ def store_in_mem(value, address):
     try:
         value.store_in_mem(address)
     except AttributeError:
+        if isinstance(value, (list, tuple)):
+            for i, x in enumerate(value):
+                store_in_mem(x, address + i)
+            return
         # legacy
         if value.is_clear:
             if isinstance(address, cint):
@@ -261,11 +267,13 @@ def reveal(secret):
     try:
         return secret.reveal()
     except AttributeError:
+        if secret.is_clear:
+            return secret
         if secret.is_gf2n:
             res = cgf2n()
         else:
             res = cint()
-        instructions.asm_open(res, secret)
+        instructions.asm_open(True, res, secret)
         return res
 
 @vectorize
@@ -282,13 +290,13 @@ def get_arg():
     ldarg(res)
     return res
 
-def make_array(l):
+def make_array(l, t=None):
     if isinstance(l, program.Tape.Register):
-        res = Array(len(l), type(l))
+        res = Array(len(l), t or type(l))
         res[:] = l
     else:
         l = list(l)
-        res = Array(len(l), type(l[0]) if l else cint)
+        res = Array(len(l), t or type(l[0]) if l else cint)
         res.assign(l)
     return res
 
@@ -459,6 +467,24 @@ def method_block(function):
             return block(*args)
     return wrapper
 
+# def cond_swap(x,y):
+#     from .types import SubMultiArray
+#     if isinstance(x, (Array, SubMultiArray)):
+#         b = x[0] > y[0]
+#         return list(zip(*[b.cond_swap(xx, yy) for xx, yy in zip(x, y)]))
+#     b = x < y
+#     if isinstance(x, sfloat):
+#         res = ([], [])
+#         for i,j in enumerate(('v','p','z','s')):
+#             xx = x.__getattribute__(j)
+#             yy = y.__getattribute__(j)
+#             bx = b * xx
+#             by = b * yy
+#             res[0].append(bx + yy - by)
+#             res[1].append(xx - bx + by)
+#         return sfloat(*res[0]), sfloat(*res[1])
+#     return b.cond_swap(y, x)
+
 def cond_swap(x,y):
     b = x < y
     if isinstance(x, sfloat):
@@ -501,12 +527,15 @@ def odd_even_merge_sort(a):
     if len(a) == 1:
         return
     elif len(a) % 2 == 0:
+        aa = a
+        a = list(a)
         lower = a[:len(a)//2]
         upper = a[len(a)//2:]
         odd_even_merge_sort(lower)
         odd_even_merge_sort(upper)
         a[:] = lower + upper
         odd_even_merge(a)
+        aa[:] = a
     else:
         raise CompilerError('Length of list must be power of two')
 
@@ -874,15 +903,15 @@ def range_loop(loop_body, start, stop=None, step=None):
         # known loop count
         if condition(start):
             get_tape().req_node.children[-1].aggregator = \
-                lambda x: ((stop - start) // step) * x[0]
+                lambda x: int(ceil(((stop - start) / step))) * x[0]
 
 def for_range(start, stop=None, step=None):
     """
     Decorator to execute loop bodies consecutively.  Arguments work as
-    in Python :py:func:`range`, but they can by any public
+    in Python :py:func:`range`, but they can be any public
     integer. Information has to be passed out via container types such
-    as :py:class:`~Compiler.types.Array` or declaring registers as
-    :py:obj:`global`. Note that changing Python data structures such
+    as :py:class:`~Compiler.types.Array` or using :py:func:`update`.
+    Note that changing Python data structures such
     as lists within the loop is not possible, but the compiler cannot
     warn about this.
 
@@ -897,13 +926,11 @@ def for_range(start, stop=None, step=None):
         @for_range(n)
         def _(i):
             a[i] = i
-            global x
-            x += 1
+            x.update(x + 1)
 
     Note that you cannot overwrite data structures such as
-    :py:class:`~Compiler.types.Array` in a loop even when using
-    :py:obj:`global`. Use :py:func:`~Compiler.types.Array.assign`
-    instead.
+    :py:class:`~Compiler.types.Array` in a loop.  Use
+    :py:func:`~Compiler.types.Array.assign` instead.
     """
     def decorator(loop_body):
         range_loop(loop_body, start, stop, step)
@@ -1013,9 +1040,11 @@ def map_reduce_single(n_parallel, n_loops, initializer=lambda *x: [],
             def f(i):
                 state = tuplify(initializer())
                 start_block = get_block()
+                j = i * n_parallel
+                one = regint(1)
                 for k in range(n_parallel):
-                    j = i * n_parallel + k
                     state = reducer(tuplify(loop_body(j)), state)
+                    j += one
                 if n_parallel > 1 and start_block != get_block():
                     print('WARNING: parallelization broken '
                           'by control flow instruction')
@@ -1514,11 +1543,17 @@ def if_then(condition):
     state = State()
     if callable(condition):
         condition = condition()
+    try:
+        if not condition.is_clear:
+            raise CompilerError('cannot branch on secret values')
+    except AttributeError:
+        pass
     state.condition = regint.conv(condition)
     state.start_block = instructions.program.curr_block
     state.req_child = get_tape().open_scope(lambda x: x[0].max(x[1]), \
                                                    name='if-block')
     state.has_else = False
+    state.caller = [frame[1:] for frame in inspect.stack()[1:]]
     instructions.program.curr_tape.if_states.append(state)
 
 def else_then():
@@ -1884,7 +1919,7 @@ def FPDiv(a, b, k, f, kappa, simplex_flag=False, nearest=False):
     theta = int(ceil(log(k/3.5) / log(2)))
 
     base.set_global_vector_size(b.size)
-    alpha = b.get_type(2 * k).two_power(2*f)
+    alpha = b.get_type(2 * k).two_power(2*f, size=b.size)
     w = AppRcr(b, k, f, kappa, simplex_flag, nearest).extend(2 * k)
     x = alpha - b.extend(2 * k) * w
     base.reset_global_vector_size()

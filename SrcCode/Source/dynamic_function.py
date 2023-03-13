@@ -214,12 +214,15 @@ class DynamicVariables(object):
         for item in input:
             if isinstance(item, str) and item.startswith('data'):
                 data_index.append(item[4:])
+
         party_index = []
         for item in data_index:
             party_index.append(int(item.split('-')[0]))
+
         party_index = sort(list(set(party_index)))
         n_party = len(party_index)
         party_dimensions = []
+
         for i in range(n_party): # dealing with the case that single party has multiple input columns.
             single_party_dimension = []
             for j in range(len(data_index)):

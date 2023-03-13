@@ -11,6 +11,7 @@ using namespace std;
 #include "Networking/Player.h"
 #include "Protocols/MAC_Check_Base.h"
 #include "Tools/time-func.h"
+#include "Tools/Coordinator.h"
 
 
 /* The MAX number of things we will partially open before running
@@ -65,7 +66,11 @@ class Tree_MAC_Check : public TreeSum<typename U::open_type>, public MAC_Check_B
 {
   typedef typename U::open_type T;
 
+  template<class V> friend class Tree_MAC_Check;
+
   protected:
+
+  static Coordinator* coordinator;
 
   /* POpen Data */
   int popen_cnt;
@@ -79,12 +84,15 @@ class Tree_MAC_Check : public TreeSum<typename U::open_type>, public MAC_Check_B
 
   public:
 
+  static void setup(Player& P);
+  static void teardown();
+
   Tree_MAC_Check(const typename U::mac_key_type::Scalar& ai, int opening_sum = 10,
       int max_broadcast = 10, int send_player = 0);
   virtual ~Tree_MAC_Check();
 
   virtual void init_open(const Player& P, int n = 0);
-  virtual void prepare_open(const U& secret);
+  virtual void prepare_open(const U& secret, int = -1);
   virtual void exchange(const Player& P);
 
   virtual void AddToCheck(const U& share, const T& value, const Player& P);
@@ -93,6 +101,9 @@ class Tree_MAC_Check : public TreeSum<typename U::open_type>, public MAC_Check_B
   // compatibility
   void set_random_element(const U& random_element) { (void) random_element; }
 };
+
+template<class U>
+Coordinator* Tree_MAC_Check<U>::coordinator = 0;
 
 /**
  * SPDZ opening protocol with MAC check (indirect communication)
@@ -132,7 +143,7 @@ public:
   MAC_Check_Z2k(const T& ai, int opening_sum=10, int max_broadcast=10, int send_player=0);
   MAC_Check_Z2k(const T& ai, Names& Nms, int thread_num);
 
-  void prepare_open(const W& secret);
+  void prepare_open(const W& secret, int = -1);
   void prepare_open_no_mask(const W& secret);
 
   virtual void Check(const Player& P);
@@ -173,7 +184,7 @@ public:
   ~Direct_MAC_Check();
 
   void init_open(const Player& P, int n = 0);
-  void prepare_open(const T& secret);
+  void prepare_open(const T& secret, int = -1);
   void exchange(const Player& P);
 };
 

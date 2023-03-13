@@ -1,8 +1,8 @@
 1
 1
-tutorial-0
+tutorial-0:33263
 1 0
 0
-./compile.py tutorial
-lgp:106
-opts: trunc_pr split edabit
+./compile.py -R 128 tutorial
+R:128
+opts: edabit trunc_pr split

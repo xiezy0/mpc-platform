@@ -127,8 +127,14 @@ def vectorize(operation):
             if (isinstance(args[0], Tape.Register) or isinstance(args[0], sfloat)) \
                     and not isinstance(args[0], bits) \
                     and args[0].size != self.size:
-                raise VectorMismatch('Different vector sizes of operands: %d/%d'
-                                    % (self.size, args[0].size))
+                if min(args[0].size, self.size) == 1:
+                    size = max(args[0].size, self.size)
+                    self = self.expand_to_vector(size)
+                    args = list(args)
+                    args[0] = args[0].expand_to_vector(size)
+                else:
+                    raise VectorMismatch('Different vector sizes of operands: %d/%d'
+                                         % (self.size, args[0].size))
         set_global_vector_size(self.size)
         try:
             res = operation(self, *args, **kwargs)
@@ -214,6 +220,14 @@ def read_mem_value(operation):
     copy_doc(read_mem_operation, operation)
     return read_mem_operation
 
+def type_comp(operation):
+    def type_check(self, other, *args, **kwargs):
+        if not isinstance(other, (type(self), int, regint, self.clear_type)):
+            return NotImplemented
+        return operation(self, other, *args, **kwargs)
+    copy_doc(type_check, operation)
+    return type_check
+
 def inputmixed(*args):
     # helper to cover both cases
     if isinstance(args[-1], int):
@@ -249,8 +263,11 @@ class _number(Tape._no_truth):
             try:
                 return self.mul(other)
             except VectorMismatch:
-                # try reverse multiplication
-                return NotImplemented
+                if type(self) != type(other) and 1 in (self.size, other.size):
+                    # try reverse multiplication
+                    return NotImplemented
+                else:
+                    raise
 
     __radd__ = __add__
     __rmul__ = __mul__
@@ -323,6 +340,9 @@ class _number(Tape._no_truth):
     @staticmethod
     def popcnt_bits(bits):
         return sum(bits)
+
+    def zero_if_not(self, condition):
+        return condition * self
 
 class _int(Tape._no_truth):
     """ Integer functionality. """
@@ -451,6 +471,10 @@ class _bit(Tape._no_truth):
     def carry_out(self, a, b):
         s = a ^ b
         return a ^ (s & (self ^ a))
+
+    def cond_swap(self, a, b):
+        prod = self * (a ^ b)
+        return a ^ prod, b ^ prod
 
 class _gf2n(_bit):
     """ :math:`\mathrm{GF}(2^n)` functionality. """
@@ -733,7 +757,14 @@ class _register(Tape.Register, _number, _structure):
             self.mov(res[i], self)
         return res
 
-class _clear(_register):
+class _arithmetic_register(_register):
+    """ Arithmetic circuit type. """
+    def __init__(self, *args, **kwargs):
+        if program.options.garbled:
+            raise CompilerError('functionality only available in arithmetic circuits')
+        super(_arithmetic_register, self).__init__(*args, **kwargs)
+
+class _clear(_arithmetic_register):
     """ Clear domain-dependent type. """
     __slots__ = []
     mov = staticmethod(movc)
@@ -1069,6 +1100,8 @@ class cint(_clear, _int):
     def __ne__(self, other):
         return 1 - (self == other)
 
+    equal = lambda self, other, *args, **kwargs: self.__eq__(other)
+
     def __lshift__(self, other):
         """ Clear left shift.
 
@@ -1165,7 +1198,7 @@ class cint(_clear, _int):
     def print_if(self, string):
         """ Output if value is non-zero.
 
-        :param string: Python string """
+        :param string: bytearray """
         cond_print_str(self, string)
 
     def output_if(self, cond):
@@ -1638,7 +1671,7 @@ class regint(_register, _int):
 
     def _condition(self):
         if program.options.binary:
-            from GC.types import cbits
+            from .GC.types import cbits
             return cbits.get_type(64)(self)
         else:
             return cint(self)
@@ -1651,6 +1684,8 @@ class regint(_register, _int):
         """
         if player == None:
             player = -1
+        if not util.is_constant(player):
+            raise CompilerError('Player number must be known at compile time')
         intoutput(player, self)
 
 class localint(Tape._no_truth):
@@ -1818,7 +1853,7 @@ class longint:
             res += x.bit_decompose(64)
         return res[:bit_length]
 
-class _secret(_register, _secret_structure):
+class _secret(_arithmetic_register, _secret_structure):
     __slots__ = []
 
     mov = staticmethod(set_instruction_type(movs))
@@ -2074,12 +2109,15 @@ class _secret(_register, _secret_structure):
         return self.secret_op(other, subs, submr, subsfi, True)
     __rsub__.__doc__ = __sub__.__doc__
 
-    @vectorize
     def __truediv__(self, other):
         """ Secret field division.
 
         :param other: any compatible type """
-        return self * (self.clear_type(1) / other)
+        try:
+            one = self.clear_type(1, size=other.size)
+        except AttributeError:
+            one = self.clear_type(1)
+        return self * (one / other)
 
     @vectorize
     def __rtruediv__(self, other):
@@ -2106,12 +2144,12 @@ class _secret(_register, _secret_structure):
 
     @set_instruction_type
     @vectorize
-    def reveal(self):
+    def reveal(self, check=True):
         """ Reveal secret value publicly.
 
         :rtype: relevant clear type """
         res = self.clear_type()
-        asm_open(res, self)
+        asm_open(check, res, self)
         return res
 
     @set_instruction_type
@@ -2125,6 +2163,21 @@ class _secret(_register, _secret_structure):
         masked = self + mask[0]
         res = personal(player, masked.reveal() - mask[1])
         return res
+
+    @set_instruction_type
+    @vectorize
+    def raw_right_shift(self, length):
+        """ Local right shift in supported protocols.
+        In integer-like protocols, the output is potentially off by one.
+
+        :param length: number of bits
+        """
+        res = type(self)()
+        shrsi(res, self, length)
+        return res
+
+    def raw_mod2m(self, m):
+        return self - (self.raw_right_shift(m) << m)
 
 
 class sint(_secret, _int):
@@ -2144,9 +2197,7 @@ class sint(_secret, _int):
     signed integer in a restricted range, see below. The same holds
     for ``abs()``, shift operators (``<<, >>``), modulo (``%``), and
     exponentation (``**``). Modulo only works if the right-hand
-    operator is a compile-time power of two, and exponentiation only
-    works if the base is two or if the exponent is a compile-time
-    integer.
+    operator is a compile-time power of two.
 
     Most non-linear operations require compile-time parameters for bit
     length and statistical security. They default to the global
@@ -2319,6 +2370,9 @@ class sint(_secret, _int):
             n_clients = clients.length
         else:
             n_clients = len(clients)
+            set_global_vector_size(1)
+            clients = Array.create_from(regint.conv(clients))
+            reset_global_vector_size()
 
         @library.for_range(n_clients)
         def loop_body(i):
@@ -2441,6 +2495,7 @@ class sint(_secret, _int):
         return (self >= 0).if_else(self, -self)
 
     @read_mem_value
+    @type_comp
     @vectorize
     def __lt__(self, other, bit_length=None, security=None):
         """ Secret comparison (signed).
@@ -2455,6 +2510,7 @@ class sint(_secret, _int):
         return res
 
     @read_mem_value
+    @type_comp
     @vectorize
     def __gt__(self, other, bit_length=None, security=None):
         res = sintbit()
@@ -2463,18 +2519,25 @@ class sint(_secret, _int):
                        security or program.security)
         return res
 
+    @read_mem_value
+    @type_comp
     def __le__(self, other, bit_length=None, security=None):
         return 1 - self.greater_than(other, bit_length, security)
 
+    @read_mem_value
+    @type_comp
     def __ge__(self, other, bit_length=None, security=None):
         return 1 - self.less_than(other, bit_length, security)
 
     @read_mem_value
+    @type_comp
     @vectorize
     def __eq__(self, other, bit_length=None, security=None):
         return floatingpoint.EQZ(self - other, bit_length or program.bit_length,
                                  security or program.security)
 
+    @read_mem_value
+    @type_comp
     def __ne__(self, other, bit_length=None, security=None):
         return 1 - self.equal(other, bit_length, security)
 
@@ -2645,12 +2708,21 @@ class sint(_secret, _int):
         comparison.Trunc(res, tmp, 2 * k, k, kappa, True)
         return res
 
+    @vectorize
+    def int_mod(self, other, bit_length=None):
+        """ Secret integer modulo.
+
+        :param other: sint
+        :param bit_length: bit length of input (default: global bit length)
+        """
+        return self - other * self.int_div(other, bit_length=bit_length)
+
     def trunc_zeros(self, n_zeros, bit_length=None, signed=True):
         bit_length = bit_length or program.bit_length
         return comparison.TruncZeros(self, bit_length, n_zeros, signed)
 
     @staticmethod
-    def two_power(n):
+    def two_power(n, size=None):
         return floatingpoint.two_power(n)
 
     def split_to_n_summands(self, length, n):
@@ -2668,16 +2740,6 @@ class sint(_secret, _int):
         columns = self.split_to_n_summands(length, n)
         return _bitint.wallace_tree_without_finish(columns, get_carry)
 
-    @vectorize
-    def raw_right_shift(self, length):
-        res = sint()
-        shrsi(res, self, length)
-        return res
-
-    def raw_mod2m(self, m):
-        return self - (self.raw_right_shift(m) << m)
-
-    @vectorize
     def reveal_to(self, player):
         """ Reveal secret value to :py:obj:`player`.
 
@@ -2685,13 +2747,14 @@ class sint(_secret, _int):
         :returns: :py:class:`personal`
         """
         if not util.is_constant(player):
-            secret_mask = sint()
-            player_mask = cint()
-            inputmaskreg(secret_mask, player_mask, regint.conv(player))
+            secret_mask = sint(size=self.size)
+            player_mask = cint(size=self.size)
+            inputmaskreg(secret_mask, player_mask,
+                         regint.conv(player).expand_to_vector(self.size))
             return personal(player,
-                            (self + secret_mask).reveal() - player_mask)
+                            (self + secret_mask).reveal(False) - player_mask)
         else:
-            res = personal(player, self.clear_type())
+            res = personal(player, self.clear_type(size=self.size))
             privateoutput(self.size, player, res._v, self)
             return res
 
@@ -2763,6 +2826,30 @@ class sint(_secret, _int):
         applyshuffle(res, self, unit_size, shuffle, reverse)
         return res
 
+    def inverse_permutation(self):
+        if program.use_invperm():
+            # If enabled, we use the low-level INVPERM instruction.
+            # This instruction has only been implemented for a semi-honest two-party environement.
+            res = sint(size=self.size)
+            inverse_permutation(res, self)
+        else:
+            shuffle = sint.get_secure_shuffle(len(self))
+            shuffled = self.secure_permute(shuffle).reveal()
+            idx = Array.create_from(shuffled)
+            res = Array.create_from(sint(regint.inc(len(self))))
+            res.secure_permute(shuffle, reverse=False)
+            res.assign_slice_vector(idx, res.get_vector())
+            library.break_point()
+            res = res.get_vector()
+        return res
+
+    @vectorize
+    def prefix_sum(self):
+        """ Prefix sum. """
+        res = sint()
+        prefixsums(res, self)
+        return res
+
 class sintbit(sint):
     """ :py:class:`sint` holding a bit, supporting binary operations
     (``&, |, ^``). """
@@ -2811,7 +2898,9 @@ class sintbit(sint):
         elif util.is_zero(other):
             return self
         elif util.is_one(other):
-            return 1
+            res = sintbit()
+            submr(res, cint(1), self)
+            return res
         else:
             return NotImplemented
 
@@ -2823,6 +2912,10 @@ class sintbit(sint):
             return res
         else:
             return super(sintbit, self).__rsub__(other)
+
+    __rand__ = __and__
+    __rxor__ = __xor__
+    __ror__ = __or__
 
 class sgf2n(_secret, _gf2n):
     """
@@ -2841,6 +2934,7 @@ class sgf2n(_secret, _gf2n):
     instruction_type = 'gf2n'
     clear_type = cgf2n
     reg_type = 'sg'
+    long_one = staticmethod(lambda: 1)
 
     @classmethod
     def get_type(cls, length):
@@ -2990,6 +3084,7 @@ class _bitint(Tape._no_truth):
     bits = None
     log_rounds = False
     linear_rounds = False
+    comp_result = staticmethod(lambda x: x)
 
     @staticmethod
     def half_adder(a, b):
@@ -3209,12 +3304,16 @@ class _bitint(Tape._no_truth):
             del carries[-1]
         return sums, carries
 
+    def expand(self, other):
+        a = self.bit_decompose()
+        b = util.bit_decompose(other, self.n_bits)
+        return a, b
+
     def __sub__(self, other):
         if type(other) == sgf2n:
             raise CompilerError('Unclear subtraction')
-        a = self.bit_decompose()
-        b = util.bit_decompose(other, self.n_bits)
         from util import bit_not, bit_and, bit_xor
+        a, b = self.expand(other)
         n = 1
         for x in (a + b):
             try:
@@ -3261,8 +3360,7 @@ class _bitint(Tape._no_truth):
         a[-1], b[-1] = b[-1], a[-1]
     
     def comparison(self, other, const_rounds=False, index=None):
-        a = self.bit_decompose()
-        b = util.bit_decompose(other, self.n_bits)
+        a, b = self.expand(other)
         self.prep_comparison(a, b)
         if const_rounds:
             return self.get_highest_different_bits(a, b, index)
@@ -3272,30 +3370,33 @@ class _bitint(Tape._no_truth):
     def __lt__(self, other):
         if program.options.comparison == 'log':
             x, not_equal = self.comparison(other)
-            return util.if_else(not_equal, x, 0)
+            res = util.if_else(not_equal, x, 0)
         else:
-            return self.comparison(other, True, 1)
+            res = self.comparison(other, True, 1)
+        return self.comp_result(res)
 
     def __le__(self, other):
         if program.options.comparison == 'log':
             x, not_equal = self.comparison(other)
-            return util.if_else(not_equal, x, 1)
+            res = util.if_else(not_equal, x, x.long_one())
         else:
-            return 1 - self.comparison(other, True, 0)
+            res = self.comparison(other, True, 0).bit_not()
+        return self.comp_result(res)
 
     def __ge__(self, other):
-        return 1 - (self < other)
+        return (self < other).bit_not()
 
     def __gt__(self, other):
-        return 1 - (self <= other)
+        return (self <= other).bit_not()
 
     def __eq__(self, other, bit_length=None, security=None):
         diff = self ^ other
-        diff_bits = [1 - x for x in diff.bit_decompose()[:bit_length]]
-        return floatingpoint.KMul(diff_bits)
+        diff_bits = [x.bit_not() for x in diff.bit_decompose()[:bit_length]]
+        return self.comp_result(util.tree_reduce(lambda x, y: x.bit_and(y),
+                                                 diff_bits))
 
     def __ne__(self, other):
-        return 1 - (self == other)
+        return (self == other).bit_not()
 
     equal = __eq__
 
@@ -3849,7 +3950,6 @@ class cfix(_number, _structure):
     def output_if(self, cond):
         cond_print_plain(cint.conv(cond), self.v, cint(-self.f, size=self.size))
 
-    @vectorize
     def binary_output(self, player=None):
         """ Write double-precision floating-point number to
         ``Player-Data/Binary-Output-P<playerno>-<threadno>``.
@@ -3858,7 +3958,11 @@ class cfix(_number, _structure):
         """
         if player == None:
             player = -1
+        if not util.is_constant(player):
+            raise CompilerError('Player number must be known at compile time')
+        set_global_vector_size(self.size)
         floatoutput(player, self.v, cint(-self.f), cint(0), cint(0))
+        reset_global_vector_size()
 
 class _single(_number, _secret_structure):
     """ Representation as single integer preserving the order """
@@ -3878,6 +3982,8 @@ class _single(_number, _secret_structure):
         :param n: number of inputs (int)
         :param client_id: regint
         :param size: vector size (default 1)
+        :returns: list of length ``n``
+
         """
         sint_inputs = cls.int_type.receive_from_client(n, client_id,
                                                        message_type)
@@ -3915,6 +4021,8 @@ class _single(_number, _secret_structure):
     def conv(cls, other):
         if isinstance(other, cls):
             return other
+        elif isinstance(other, (list, tuple)):
+            return type(other)(cls.conv(x) for x in other)
         else:
             try:
                 return cls.from_sint(other)
@@ -4092,6 +4200,7 @@ class _single(_number, _secret_structure):
 class _fix(_single):
     """ Secret fixed point type. """
     __slots__ = ['v', 'f', 'k']
+    is_clear = False
 
     def set_precision(cls, f, k = None):
         cls.f = f
@@ -4153,7 +4262,7 @@ class _fix(_single):
         if isinstance(other, _fix) and (cls.k, cls.f) == (other.k, other.f):
             return other
         else:
-            return cls(other)
+            return super(_fix, cls).conv(other)
 
     @classmethod
     def _new(cls, other, k=None, f=None):
@@ -4317,6 +4426,18 @@ class _fix(_single):
         """ Bit decomposition. """
         return self.v.bit_decompose(n_bits or self.k)
 
+    def update(self, other):
+        """
+        Update register. Useful in loops like
+        :py:func:`~Compiler.library.for_range`.
+
+        :param other: any convertible type
+
+        """
+        other = self.conv(other)
+        assert self.f == other.f
+        self.v.update(other.v)
+
 class sfix(_fix):
     """ Secret fixed-point number represented as secret integer, by
     multiplying with ``2^f`` and then rounding. See :py:class:`sint`
@@ -4448,6 +4569,9 @@ class sfix(_fix):
     def secure_permute(self, *args, **kwargs):
         return self._new(self.v.secure_permute(*args, **kwargs),
                          k=self.k, f=self.f)
+
+    def prefix_sum(self):
+        return self._new(self.v.prefix_sum(), k=self.k, f=self.f)
 
 class unreduced_sfix(_single):
     int_type = sint
@@ -4705,6 +4829,8 @@ class sfloat(_number, _secret_structure):
     returning :py:class:`sint`. The other operand can be any of
     sint/cfix/regint/cint/int/float.
 
+    This data type only works with arithmetic computation.
+
     :param v: initialization (sfloat/sfix/float/int/sint/cint/regint)
     """
     __slots__ = ['v', 'p', 'z', 's', 'size']
@@ -4803,6 +4929,9 @@ class sfloat(_number, _secret_structure):
     @vectorize_init
     @read_mem_value
     def __init__(self, v, p=None, z=None, s=None, size=None):
+        if program.options.binary:
+            raise CompilerError(
+                'floating-point operations not supported with binary circuits')
         self.size = get_global_vector_size()
         if p is None:
             if isinstance(v, sfloat):
@@ -5057,10 +5186,12 @@ class sfloat(_number, _secret_structure):
         """ Secret floating-point comparison. """
         return 1 - (self < other)
 
+    @vectorize
     def __gt__(self, other):
         """ Secret floating-point comparison. """
         return self.conv(other) < self
 
+    @vectorize
     def __le__(self, other):
         """ Secret floating-point comparison. """
         return self.conv(other) >= self
@@ -5189,13 +5320,23 @@ class Array(_vectorizable):
       a[:] += b[:]
 
     """
+    check_indices = True
+
     @classmethod
     def create_from(cls, l):
         """ Convert Python iterator or vector to array. Basic type will be taken
         from first element, further elements must to be convertible to
-        that. """
+        that.
+
+        :param l: Python iterable or register vector
+        :returns: :py:class:`Array` of appropriate type containing the contents
+          of :py:obj:`l`
+
+        """
         if isinstance(l, cls):
-            return l
+            res = l.same_shape()
+            res[:] = l[:]
+            return res
         if isinstance(l, _number):
             tmp = l
             t = type(l)
@@ -5216,7 +5357,6 @@ class Array(_vectorizable):
         self.debug = debug
         self.creator_tape = program.curr_tape
         self.sink = None
-        self.check_indices = True
         if alloc:
             self.alloc()
 
@@ -5251,7 +5391,8 @@ class Array(_vectorizable):
                 # length can be None for single-element arrays
                 length = 0
             base = self.address + index * self.value_type.mem_size()
-            if size is not None and isinstance(base, _register):
+            if size is not None and isinstance(base, _register) \
+               and not issubclass(self.value_type, _vec):
                 base = regint._expand_address(base, size)
             self.address_cache[program.curr_block, key] = \
                 util.untuplify([base + i * length \
@@ -5316,7 +5457,7 @@ class Array(_vectorizable):
         :param condition: 0/1 (regint/cint/int)
         :param index: regint/cint/int
         """
-        return condition * self[condition * index]
+        return self[condition * index].zero_if_not(condition)
 
     def maybe_set(self, condition, index, value):
         """ Change entry if condition is true.
@@ -5346,13 +5487,16 @@ class Array(_vectorizable):
         return self.value_type.load_mem(address)
 
     def _store(self, value, address):
-        self.value_type.conv(value).store_in_mem(address)
+        tmp = self.value_type.conv(value)
+        if not isinstance(tmp, _vec) and tmp.size != self.value_type.mem_size():
+            raise CompilerError('size mismatch in array assignment')
+        tmp.store_in_mem(address)
 
     def __len__(self):
         return self.length
 
     def total_size(self):
-        return len(self) * self.value_type.n_elements()
+        return self.length * self.value_type.n_elements()
 
     def __iter__(self):
         for i in range(self.length):
@@ -5417,6 +5561,12 @@ class Array(_vectorizable):
 
     get_part_vector = get_vector
 
+    def get_reverse_vector(self):
+        """ Return vector with content in reverse order. """
+        size = self.length
+        address = regint.inc(size, size - 1, -1)
+        return self.value_type.load_mem(self.address + address, size=size)
+
     def get_part(self, base, size):
         """ Part array.
 
@@ -5476,7 +5626,8 @@ class Array(_vectorizable):
         try:
             self.assign(input_from(player, size=len(self)))
         except (TypeError, CompilerError):
-            @library.for_range_opt(len(self), budget=budget)
+            print (budget)
+            @library.for_range_opt(self.length, budget=budget)
             def _(i):
                 self[i] = input_from(player)
 
@@ -5515,7 +5666,6 @@ class Array(_vectorizable):
         """ Vector subtraction.
 
         :param other: vector or container of same length and type that supports operations with type of this array """
-        assert len(self) == len(other)
         return self.get_vector() - other
 
     def __mul__(self, value):
@@ -5578,7 +5728,7 @@ class Array(_vectorizable):
         """ Reveal the whole array.
 
         :returns: Array of relevant clear type. """
-        return Array.create_from(x.reveal() for x in self)
+        return Array.create_from(self.get_vector().reveal())
 
     def reveal_list(self):
         """ Reveal as list. """
@@ -5638,13 +5788,14 @@ class Array(_vectorizable):
         :param batcher: use Batcher's odd-even mergesort in any case
         :param n_bits: number of bits in keys (default: global bit length)
         """
-        if batcher or self.value_type.n_elements() > 1:
+        if batcher or self.value_type.n_elements() > 1 or \
+           program.options.binary:
             library.loopy_odd_even_merge_sort(self, n_threads=n_threads)
         else:
             if n_threads or 1 > 1:
                 raise CompilerError('multi-threaded sorting only implemented '
                                     'with Batcher\'s odd-even mergesort')
-            import sorting
+            from . import sorting
             sorting.radix_sort(self, self, n_bits=n_bits)
 
     def Array(self, size):
@@ -5701,7 +5852,8 @@ class SubMultiArray(_vectorizable):
                 self.sub_cache[key] = \
                         Array(self.sizes[1], self.value_type, \
                               self.address + index * self.sizes[1] *
-                              self.value_type.n_elements(), \
+                              self.value_type.n_elements() * \
+                              self.value_type.mem_size(), \
                               debug=self.debug)
             else:
                 self.sub_cache[key] = \
@@ -5729,6 +5881,13 @@ class SubMultiArray(_vectorizable):
 
     def to_array(self):
         return Array(self.total_size(), self.value_type, address=self.address)
+
+    def maybe_get(self, condition, index):
+        return self[condition * index]
+
+    def maybe_set(self, condition, index, value):
+        for i, x in enumerate(value):
+            self.maybe_get(condition, index).maybe_set(condition, i, x)
 
     def assign_all(self, value):
         """ Assign the same value to all entries.
@@ -5879,17 +6038,16 @@ class SubMultiArray(_vectorizable):
         """ Fill with inputs from player if supported by type.
 
         :param player: public (regint/cint/int) """
-        budget = budget or Tape.Register.maximum_size
-        if (self.total_size() < budget) and \
-           self.value_type.n_elements() == 1:
+        if util.is_constant(self.total_size()) and \
+           self.value_type.n_elements() == 1 and \
+           self.value_type.mem_size() == 1:
             if raw or program.always_raw():
                 input_from = self.value_type.get_raw_input_from
             else:
                 input_from = self.value_type.get_input_from
             self.assign_vector(input_from(player, size=self.total_size()))
         else:
-            @library.for_range_opt(self.sizes[0],
-                                   budget=budget / self[0].total_size())
+            @library.for_range_opt(self.sizes[0], budget=budget)
             def _(i):
                 self[i].input_from(player, budget=budget, raw=raw)
 
@@ -6042,6 +6200,7 @@ class SubMultiArray(_vectorizable):
                     assert n_threads is None
                     if max(res_matrix.sizes) > 1000:
                         raise AttributeError()
+                    self.value_type.matrix_mul
                     A = self.get_vector()
                     B = other.get_vector()
                     res_matrix.assign_vector(
@@ -6054,12 +6213,12 @@ class SubMultiArray(_vectorizable):
                     try:
                         res_matrix[i] = self.value_type.row_matrix_mul(
                             self[i], other, res_params)
-                    except AttributeError:
+                    except (AttributeError, CompilerError):
                         # fallback for binary circuits
-                        @library.for_range(other.sizes[1])
+                        @library.for_range_opt(other.sizes[1])
                         def _(j):
                             res_matrix[i][j] = 0
-                            @library.for_range(self.sizes[1])
+                            @library.for_range_opt(self.sizes[1])
                             def _(k):
                                 res_matrix[i][j] += self[i][k] * other[k][j]
             return res_matrix
@@ -6178,13 +6337,7 @@ class SubMultiArray(_vectorizable):
             res[i] = self.direct_mul_trans(other, indices=indices)
 
     def direct_mul_to_matrix(self, other):
-        """ Matrix multiplication in the virtual machine.
-
-        :param self: :py:class:`Matrix` / 2-dimensional :py:class:`MultiArray`
-        :param other: :py:class:`Matrix` / 2-dimensional :py:class:`MultiArray`
-        :returns: :py:obj:`Matrix`
-
-        """
+        # Obsolete. Use dot().
         res = self.value_type.Matrix(self.sizes[0], other.sizes[1])
         res.assign_vector(self.direct_mul(other))
         return res
@@ -6274,13 +6427,15 @@ class SubMultiArray(_vectorizable):
         res = Matrix(self.sizes[1], self.sizes[0], self.value_type)
         library.break_point()
         if self.value_type.n_elements() == 1:
-            @library.for_range_opt(self.sizes[0])
-            def _(j):
-                res.set_column(j, self[j][:])
+            nr = self.sizes[1]
+            nc = self.sizes[0]
+            a = regint.inc(nr * nc, 0, nr, 1, nc)
+            b = regint.inc(nr * nc, 0, 1, nc)
+            res[:] = self.value_type.load_mem(self.address + a + b)
         else:
-            @library.for_range_opt(self.sizes[1])
+            @library.for_range_opt(self.sizes[1], budget=100)
             def _(i):
-                @library.for_range_opt(self.sizes[0])
+                @library.for_range_opt(self.sizes[0], budget=100)
                 def _(j):
                     res[i][j] = self[j][i]
         library.break_point()
@@ -6317,22 +6472,33 @@ class SubMultiArray(_vectorizable):
         :param n_bits: number of bits in keys (default: global bit length)
 
         """
+        if program.options.binary:
+            assert key_indices is None
+            assert len(self.sizes) == 2
+            library.loopy_odd_even_merge_sort(self)
+            return
         if key_indices is None:
             key_indices = (0,) * (len(self.sizes) - 1)
         key_indices = (None,) + util.tuplify(key_indices)
-        import sorting
+        from . import sorting
         keys = self.get_vector_by_indices(*key_indices)
         sorting.radix_sort(keys, self, n_bits=n_bits)
 
     def randomize(self, *args):
         """ Randomize according to data type. """
-        if self.total_size() < program.options.budget:
+        if self.total_size() < program.budget:
             self.assign_vector(
                 self.value_type.get_random(*args, size=self.total_size()))
         else:
             @library.for_range(self.sizes[0])
             def _(i):
                 self[i].randomize(*args)
+
+    def reveal(self):
+        """ Reveal to :py:obj:`MultiArray` of same shape. """
+        res = MultiArray(self.sizes, self.value_type.clear_type)
+        res[:] = self.get_vector().reveal()
+        return res
 
     def reveal_list(self):
         """ Reveal as list. """
@@ -6354,7 +6520,8 @@ class SubMultiArray(_vectorizable):
 
         :param end: string to print after (default: line break)
         """
-        if self.total_size() < program.options.budget:
+        if util.is_constant(self.total_size()) and \
+           self.total_size() < program.budget:
             library.print_str('%s' + end, self.reveal_nested())
         else:
             library.print_str('[')
@@ -6443,7 +6610,7 @@ class Matrix(MultiArray):
     @staticmethod
     def create_from(rows):
         rows = list(rows)
-        if isinstance(rows[0], (list, tuple)):
+        if isinstance(rows[0], (list, tuple, Array)):
             t = type(rows[0][0])
         else:
             t = type(rows[0])
@@ -6607,7 +6774,10 @@ class MemValue(_mem):
         :return: relevant basic type instance """
         self.check()
         if program.curr_block != self.last_write_block:
-            self.register = self.value_type.load_mem(self.address)
+            from Compiler.GC.types import sbitvec
+            self.register = self.value_type.load_mem(
+                self.address, size=self.size \
+                if issubclass(self.value_type, (_register, sbitvec)) else None)
             self.last_write_block = program.curr_block
         return self.register
 
@@ -6656,6 +6826,7 @@ class MemValue(_mem):
 
     if_else = lambda self,*args,**kwargs: self.read().if_else(*args, **kwargs)
     bit_and = lambda self,other: self.read().bit_and(other)
+    bit_not = lambda self: self.read().bit_not()
 
     def expand_to_vector(self, size=None):
         if program.curr_block == self.last_write_block:

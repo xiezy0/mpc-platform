@@ -1,3 +1,9 @@
 Using security parameter 40
-terminate called after throwing an instance of 'file_error'
-  what():  File Error : Missing 'Programs/Schedules/tutorial.sch'. Did you compile 'tutorial'?
+Significant amount of unused triples of SPDZ gfp. For more accurate benchmarks, consider reducing the batch size with -b.
+The following benchmarks are including preprocessing (offline phase).
+Time = 2.969 seconds 
+Data sent = 196.138 MB in ~2441 rounds (party 1)
+Global data sent = 392.276 MB (all parties)
+This program might benefit from some protocol options.
+Consider adding the following at the beginning of 'tutorial.mpc':
+	program.use_edabit(True)

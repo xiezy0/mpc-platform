@@ -80,6 +80,7 @@ opcodes = dict(
     SUBSI = 0x2A,
     SUBCFI = 0x2B,
     SUBSFI = 0x2C,
+    PREFIXSUMS = 0x2D,
     # Multiplication/division
     MULC = 0x30,
     MULM = 0x31,
@@ -111,6 +112,7 @@ opcodes = dict(
     GENSECSHUFFLE = 0xFB,
     APPLYSHUFFLE = 0xFC,
     DELSHUFFLE = 0xFD,
+    INVPERM = 0xFE,
     # Data access
     TRIPLE = 0x50,
     BIT = 0x51,
@@ -207,8 +209,8 @@ opcodes = dict(
     CONDPRINTPLAIN = 0xE1,
     INTOUTPUT = 0xE6,
     FLOATOUTPUT = 0xE7,
-    GBITDEC = 0x184,
-    GBITCOM = 0x185,
+    GBITDEC = 0x18A,
+    GBITCOM = 0x18B,
     # Secure socket
     INITSECURESOCKET = 0x1BA,
     RESPSECURESOCKET = 0x1BB
@@ -541,7 +543,7 @@ def cisc(function):
 
         def get_bytes(self):
             assert len(self.kwargs) < 2
-            res = int_to_bytes(opcodes['CISC'])
+            res = LongArgFormat.encode(opcodes['CISC'])
             res += int_to_bytes(sum(len(x[0]) + 2 for x in self.calls) + 1)
             name = self.function.__name__
             String.check(name)
@@ -701,10 +703,16 @@ class ClearIntAF(RegisterArgFormat):
     reg_type = RegType.ClearInt
 
 class IntArgFormat(ArgFormat):
+    n_bits = 32
+
     @classmethod
     def check(cls, arg):
-        if not isinstance(arg, int) and not arg is None:
-            raise ArgumentError(arg, 'Expected an integer-valued argument')
+        if not arg is None:
+            if not isinstance(arg, int):
+                raise ArgumentError(arg, 'Expected an integer-valued argument')
+            if arg >= 2 ** cls.n_bits or arg < -2 ** cls.n_bits:
+                raise ArgumentError(
+                    arg, 'Immediate value outside of %d-bit range' % cls.n_bits)
 
     @classmethod
     def encode(cls, arg):
@@ -717,9 +725,11 @@ class IntArgFormat(ArgFormat):
         return str(self.i)
 
 class LongArgFormat(IntArgFormat):
+    n_bits = 64
+
     @classmethod
     def encode(cls, arg):
-        return struct.pack('>Q', arg)
+        return list(struct.pack('>Q', arg))
 
     def __init__(self, f):
         self.i = struct.unpack('>Q', f.read(8))[0]
@@ -728,8 +738,6 @@ class ImmediateModpAF(IntArgFormat):
     @classmethod
     def check(cls, arg):
         super(ImmediateModpAF, cls).check(arg)
-        if arg >= 2**32 or arg < -2**32:
-            raise ArgumentError(arg, 'Immediate value outside of 32-bit range')
 
 class ImmediateGF2NAF(IntArgFormat):
     @classmethod
@@ -740,6 +748,8 @@ class ImmediateGF2NAF(IntArgFormat):
 class PlayerNoAF(IntArgFormat):
     @classmethod
     def check(cls, arg):
+        if not util.is_constant(arg):
+            raise CompilerError('Player number must be known at compile time')
         super(PlayerNoAF, cls).check(arg)
         if arg > 256:
             raise ArgumentError(arg, 'Player number > 256')
@@ -822,7 +832,7 @@ class Instruction(object):
         return (prefix << self.code_length) + self.code
 
     def get_encoding(self):
-        enc = int_to_bytes(self.get_code())
+        enc = LongArgFormat.encode(self.get_code())
         # add the number of registers if instruction flagged as has var args
         if self.has_var_args():
             enc += int_to_bytes(len(self.args))
@@ -957,7 +967,7 @@ class ParsedInstruction:
                         except AttributeError:
                             pass
         read = lambda: struct.unpack('>I', f.read(4))[0]
-        full_code = read()
+        full_code = struct.unpack('>Q', f.read(8))[0]
         code = full_code % (1 << Instruction.code_length)
         self.size = full_code >> Instruction.code_length
         self.type = cls.reverse_opcodes[code]
@@ -1106,12 +1116,16 @@ class IOInstruction(DoNotEliminateInstruction):
     @classmethod
     def str_to_int(cls, s):
         """ Convert a 4 character string to an integer. """
+        try:
+            s = bytearray(s, 'utf8')
+        except:
+            pass
         if len(s) > 4:
             raise CompilerError('String longer than 4 characters')
         n = 0
         for c in reversed(s.ljust(4)):
             n <<= 8
-            n += ord(c)
+            n += c
         return n
 
 class AsymmetricCommunicationInstruction(DoNotEliminateInstruction):

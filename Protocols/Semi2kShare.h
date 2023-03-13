@@ -55,7 +55,6 @@ public:
     {
         auto& P = protocol.P;
         int my_num = P.my_num();
-        assert(n_bits <= 64);
         int unit = GC::Clear::N_BITS;
         for (int k = 0; k < DIV_CEIL(n_inputs, unit); k++)
         {
@@ -67,33 +66,28 @@ public:
                         to_string(n) + "-way split not working with "
                                 + to_string(P.num_players()) + " parties");
 
-            for (int i = 0; i < n_bits; i++)
-                for (int j = 0; j < n; j++)
-                    dest.at(regs.at(n * i + j) + k) = {};
-
-            square64 square;
-
-            for (int j = 0; j < m; j++)
-                square.rows[j] = Integer(source[j + start]).get();
-
-            square.transpose(m, n_bits);
-
-            for (int j = 0; j < n_bits; j++)
+            for (int l = 0; l < n_bits; l += unit)
             {
-                auto& dest_reg = dest.at(regs.at(n * j + my_num) + k);
-                dest_reg = square.rows[j];
-            }
-        }
-    }
+                int base = l;
+                int n_left = min(n_bits - base, unit);
+                for (int i = base; i < base + n_left; i++)
+                    for (int j = 0; j < n; j++)
+                        dest.at(regs.at(n * i + j) + k) = {};
 
-    template<class T>
-    static void shrsi(SubProcessor<T>& proc, const Instruction& inst)
-    {
-        for (int i = 0; i < inst.get_size(); i++)
-        {
-            auto& dest = proc.get_S_ref(inst.get_r(0) + i);
-            auto& source = proc.get_S_ref(inst.get_r(1) + i);
-            dest = source >> inst.get_n();
+                square64 square;
+
+                for (int j = 0; j < m; j++)
+                    square.rows[j] = source[j + start].get_limb(l / unit);
+
+                square.transpose(m, n_left);
+
+                for (int j = 0; j < n_left; j++)
+                {
+                    auto& dest_reg = dest.at(
+                            regs.at(n * (base + j) + my_num) + k);
+                    dest_reg = square.rows[j];
+                }
+            }
         }
     }
 };

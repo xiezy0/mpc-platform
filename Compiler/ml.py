@@ -73,8 +73,13 @@ from functools import reduce
 def log_e(x):
     return mpc_math.log_fx(x, math.e)
 
+use_mux = False
+
 def exp(x):
-    return mpc_math.pow_fx(math.e, x)
+    if use_mux:
+        return mpc_math.mux_exp(math.e, x)
+    else:
+        return mpc_math.pow_fx(math.e, x)
 
 def get_limit(x):
     exp_limit = 2 ** (x.k - x.f - 1)
@@ -148,7 +153,7 @@ def argmax(x):
     """ Compute index of maximum element.
 
     :param x: iterable
-    :returns: sint
+    :returns: sint or 0 if :py:obj:`x` has length 1
     """
     def op(a, b):
         comp = (a[1] > b[1])
@@ -164,13 +169,16 @@ def softmax(x):
     return softmax_from_exp(exp_for_softmax(x)[0])
 
 def exp_for_softmax(x):
-    m = util.max(x)
+    m = util.max(x) - get_limit(x[0]) + math.log(len(x))
     mv = m.expand_to_vector(len(x))
     try:
         x = x.get_vector()
     except AttributeError:
         x = sfix(x)
-    return (x - mv > -get_limit(x)).if_else(exp(x - mv), 0), m
+    if use_mux:
+        return exp(x - mv), m
+    else:
+        return (x - mv > -get_limit(x)).if_else(exp(x - mv), 0), m
 
 def softmax_from_exp(x):
     return x / sum(x)
@@ -1072,6 +1080,7 @@ class MaxPool(NoVariableLayer):
         self.nabla_Y = Tensor(output_shape, sfix)
         self.N = shape[0]
         self.comparisons = MultiArray([self.N, self.X.sizes[3],
+                                       output_shape[1], output_shape[2],
                                        ksize[1] * ksize[2]], sint)
 
     def __repr__(self):
@@ -1091,26 +1100,28 @@ class MaxPool(NoVariableLayer):
             red = util.tree_reduce(m, [(x[0], [1] if training else [])
                                        for x in pool])
             self.Y[bi][i][j][k] = red[0]
-            for i, x in enumerate(red[1]):
-                self.comparisons[bi][k][i] = x
+            for ii, x in enumerate(red[1]):
+                self.comparisons[bi][k][i][j][ii] = x
         self.traverse(batch, process)
 
     def backward(self, compute_nabla_X=True, batch=None):
         if compute_nabla_X:
             self.nabla_X.alloc()
+            self.nabla_X.assign_all(0)
             def process(pool, bi, k, i, j):
-                for (x, h_in, w_in, h, w), c in zip(pool,
-                                                    self.comparisons[bi][k]):
+                for (x, h_in, w_in, h, w), c \
+                    in zip(pool, self.comparisons[bi][k][i][j]):
                     hh = h * h_in
                     ww = w * w_in
-                    self.nabla_X[bi][hh][ww][k] = \
-                        util.if_else(h_in * w_in, c * self.nabla_Y[bi][i][j][k],
-                                     self.nabla_X[bi][hh][ww][k])
+                    res = h_in * w_in * c * self.nabla_Y[bi][i][j][k]
+                    self.nabla_X[bi][hh][ww][k] += res
         self.traverse(batch, process)
 
     def traverse(self, batch, process):
         need_padding = [self.strides[i] * (self.Y.sizes[i] - 1) + self.ksize[i] >
                         self.X.sizes[i] for i in range(4)]
+        overlap = reduce(operator.or_,
+                         (x < y for x, y in zip(self.strides, self.ksize)))
         @for_range_opt_multithread(self.n_threads,
                                    [len(batch), self.X.sizes[3]])
         def _(l, k):
@@ -1120,6 +1131,8 @@ class MaxPool(NoVariableLayer):
                 h_base = self.strides[1] * i
                 @for_range_opt(self.Y.sizes[2])
                 def _(j):
+                    if overlap:
+                        break_point()
                     w_base = self.strides[2] * j
                     pool = []
                     for ii in range(self.ksize[1]):
@@ -2002,6 +2015,9 @@ class Optimizer:
         return res
 
     def __init__(self, report_loss=None):
+        if get_program().options.binary:
+            raise CompilerError(
+                'machine learning code not compatible with binary circuits')
         self.tol = 0.000
         self.report_loss = report_loss
         self.X_by_label = None
@@ -2384,6 +2400,11 @@ class Optimizer:
         for layer in self.layers:
             layer.output_weights()
 
+    def summary(self):
+        sizes = [var.total_size() for var in self.thetas]
+        print(sizes)
+        print('Trainable params:', sum(sizes))
+
 class Adam(Optimizer):
     """ Adam/AMSgrad optimizer.
 
@@ -2653,9 +2674,7 @@ class keras:
                 return list(self.opt.thetas)
 
             def summary(self):
-                sizes = [var.total_size() for var in self.trainable_variables]
-                print(sizes)
-                print('Trainable params:', sum(sizes))
+                self.opt.summary()
 
             def build(self, input_shape, batch_size=128):
                 data_input_shape = input_shape

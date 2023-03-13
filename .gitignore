@@ -2,3 +2,11 @@
 /server/*
 
 /opt
+/local
+/cmake-3.24.1
+/bin
+/deps
+/doc
+/logs
+/venv
+/Programs

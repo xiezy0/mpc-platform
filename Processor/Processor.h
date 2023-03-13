@@ -32,7 +32,7 @@ class SubProcessor
 
   DataPositions bit_usage;
 
-  SecureShuffle<T> shuffler;
+  typename T::Protocol::Shuffler shuffler;
 
   void resize(size_t size)       { C.resize(size); S.resize(size); }
 
@@ -61,8 +61,10 @@ public:
       ArithmeticProcessor* Proc = 0);
   ~SubProcessor();
 
+  void check();
+
   // Access to PO (via calls to POpen start/stop)
-  void POpen(const vector<int>& reg,const Player& P,int size);
+  void POpen(const Instruction& inst);
 
   void muls(const vector<int>& reg, int size);
   void mulrs(const vector<int>& reg);
@@ -77,6 +79,7 @@ public:
   size_t generate_secure_shuffle(const Instruction& instruction);
   void apply_shuffle(const Instruction& instruction, int handle);
   void delete_shuffle(int handle);
+  void inverse_permutation(const Instruction& instruction);
 
   void input_personal(const vector<int>& args);
   void send_personal(const vector<int>& args);
@@ -101,6 +104,8 @@ public:
   {
     return C[i];
   }
+
+    void inverse_permutation(const Instruction &instruction, int handle);
 };
 
 class ArithmeticProcessor : public ProcessorBase

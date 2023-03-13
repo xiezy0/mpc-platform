@@ -128,18 +128,21 @@ void Processor<sint, sgf2n>::reset(const Program& program,int arg)
   Procb.reset(program);
 }
 
+template<class T>
+void SubProcessor<T>::check()
+{
+  // protocol check before last MAC check
+  protocol.check();
+  // MACCheck
+  MC.Check(P);
+}
+
 template<class sint, class sgf2n>
 void Processor<sint, sgf2n>::check()
 {
-  // protocol check before last MAC check
-  Procp.protocol.check();
-  Proc2.protocol.check();
-  share_thread.protocol->check();
-
-  // MACCheck
-  MC2.Check(P);
-  MCp.Check(P);
-  share_thread.MC->Check(P);
+  Procp.check();
+  Proc2.check();
+  share_thread.check();
 
   //cout << num << " : Checking broadcast" << endl;
   P.Check_Broadcast();
@@ -393,8 +396,12 @@ void Processor<sint, sgf2n>::write_shares_to_file(long start_pos,
 }
 
 template <class T>
-void SubProcessor<T>::POpen(const vector<int>& reg,const Player& P,int size)
+void SubProcessor<T>::POpen(const Instruction& inst)
 {
+  if (inst.get_n())
+    check();
+  auto& reg = inst.get_start();
+  int size = inst.get_size();
   assert(reg.size() % 2 == 0);
   int sz=reg.size() / 2;
   MC.init_open(P, sz * size);
@@ -644,8 +651,9 @@ void SubProcessor<T>::conv2ds(const Instruction& instruction)
 template<class T>
 void SubProcessor<T>::secure_shuffle(const Instruction& instruction)
 {
-    SecureShuffle<T>(S, instruction.get_size(), instruction.get_n(),
-            instruction.get_r(0), instruction.get_r(1), *this);
+    typename T::Protocol::Shuffler(S, instruction.get_size(),
+            instruction.get_n(), instruction.get_r(0), instruction.get_r(1),
+            *this);
 }
 
 template<class T>
@@ -669,6 +677,12 @@ void SubProcessor<T>::delete_shuffle(int handle)
 }
 
 template<class T>
+void SubProcessor<T>::inverse_permutation(const Instruction& instruction) {
+    shuffler.inverse_permutation(S, instruction.get_size(), instruction.get_start()[0],
+                                 instruction.get_start()[1]);
+}
+
+template<class T>
 void SubProcessor<T>::input_personal(const vector<int>& args)
 {
   input.reset_all(P);
@@ -686,6 +700,16 @@ void SubProcessor<T>::input_personal(const vector<int>& args)
       S[args[i + 2] + j] = input.finalize(args[i + 1]);
 }
 
+/**
+ *
+ * @tparam T
+ * @param args Args contains four arguments
+ *      a[0] = the size of the input (and output) vector
+ *      a[1] = the player to which to reveal the output
+ *      a[2] = the memory address of the input vector (sint) (i.e. the value to reveal)
+ *      a[3] = the memory address of the output vector (cint) (i.e. the register to store the revealed value)
+ * // TODO: When would there be multiple sets of arguments? (for ... i < args.size(); i += 4 ... )
+ */
 template<class T>
 void SubProcessor<T>::private_output(const vector<int>& args)
 {

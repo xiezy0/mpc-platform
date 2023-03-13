@@ -33,6 +33,8 @@ public:
 
         // must initialize MAC key for security of some protocols
         T::read_or_generate_mac_key(directory, P, mac_key);
+
+        T::MAC_Check::setup(P);
     }
 
     /**
@@ -49,16 +51,27 @@ public:
 
         // must initialize MAC key for security of some protocols
         T::read_or_generate_mac_key(directory, P, mac_key);
+
+        T::MAC_Check::setup(P);
     }
 
     ~ProtocolSetup()
     {
         T::LivePrep::teardown();
+        T::MAC_Check::teardown();
     }
 
     typename T::mac_key_type get_mac_key() const
     {
         return mac_key;
+    }
+
+    /**
+     * Set how much preprocessing is produced at once.
+     */
+    static void set_batch_size(size_t batch_size)
+    {
+        OnlineOptions::singleton.batch_size = batch_size;
     }
 };
 
@@ -80,6 +93,13 @@ public:
         T::part_type::open_type::init_field();
         T::mac_key_type::init_field();
         T::part_type::read_or_generate_mac_key(directory, P, mac_key);
+
+        T::MAC_Check::setup(P);
+    }
+
+    ~BinaryProtocolSetup()
+    {
+        T::MAC_Check::teardown();
     }
 
     typename T::mac_key_type get_mac_key() const

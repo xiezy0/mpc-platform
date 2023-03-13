@@ -14,15 +14,16 @@
 #include "Math/mpn_fixed.h"
 #include "Tools/random.h"
 #include "Tools/intrinsics.h"
+#include "Tools/Lock.h"
 
 #include <iostream>
 using namespace std;
 
 #ifndef MAX_MOD_SZ
-   #if defined(GFP_MOD_SZ) and GFP_MOD_SZ > 10
+   #if defined(GFP_MOD_SZ) and GFP_MOD_SZ > 11
      #define MAX_MOD_SZ GFP_MOD_SZ
    #else
-     #define MAX_MOD_SZ 10
+     #define MAX_MOD_SZ 11
   #endif
 #endif
 
@@ -36,6 +37,7 @@ class Zp_Data
   mp_limb_t   prA[MAX_MOD_SZ+1];
   int         t;           // More Montgomery data
   mp_limb_t   overhang;
+  Lock        lock;
 
   template <int T>
   void Mont_Mult_(mp_limb_t* z,const mp_limb_t* x,const mp_limb_t* y) const;

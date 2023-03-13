@@ -1,7 +1,10 @@
-import ml
 import random
 import re
 import sys
+
+from Compiler import program, ml
+from Compiler.library import for_range_opt_multithread, for_range_opt, for_range, print_ln
+from Compiler.types import sfix, cfix, sfloat
 
 if len(program.args) < 4:
    print('Usage: %s <n_negative> <n_positive> <n_features>' % program.args[0],

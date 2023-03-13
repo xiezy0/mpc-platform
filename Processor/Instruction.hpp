@@ -33,9 +33,9 @@ void BaseInstruction::parse(istream& s, int inst_pos)
   r[0]=0; r[1]=0; r[2]=0; r[3]=0;
 
   int pos=s.tellg();
-  opcode=get_int(s);
-  size=unsigned(opcode)>>10;
-  opcode&=0x3FF;
+  uint64_t code = get_long(s);
+  size = code >> 10;
+  opcode = 0x3FF & code;
   
   if (size==0)
     size=1;
@@ -130,6 +130,7 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
       case DABIT:
       case SHUFFLE:
       case ACCEPTCLIENTCONNECTION:
+      case PREFIXSUMS:
         get_ints(r, s, 2);
         break;
       // instructions with 1 register operand
@@ -198,6 +199,7 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
       case GORCI:
       case GSHLCI:
       case GSHRCI:
+      case GSHRSI:
       case USE:
       case USE_INP:
       case USE_EDABIT:
@@ -282,9 +284,11 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
         n = get_int(s);
         get_vector(2, start, s);
         break;
+      // instructions with 2 register operands
+      case INVPERM:
+          get_vector(2, start, s);
+          break;
       // open instructions + read/write instructions with variable length args
-      case OPEN:
-      case GOPEN:
       case MULS:
       case GMULS:
       case MULRS:
@@ -455,6 +459,7 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
       case STMSDCI:
       case XORS:
       case ANDRS:
+      case ANDRSVEC:
       case ANDS:
       case INPUTB:
       case INPUTBVEC:
@@ -470,6 +475,8 @@ void BaseInstruction::parse_operands(istream& s, int pos, int file_pos)
         n = get_int(s);
         get_vector(4, start, s);
         break;
+      case OPEN:
+      case GOPEN:
       case TRANS:
         num_var_args = get_int(s) - 1;
         n = get_int(s);
@@ -504,9 +511,12 @@ bool Instruction::get_offline_data_usage(DataPositions& usage)
     case USE_INP:
       if (r[0] >= N_DATA_FIELD_TYPE)
         throw invalid_program();
-      if ((unsigned)r[1] >= usage.inputs.size())
-        throw Processor_Error("Player number too high");
-      usage.inputs[r[1]][r[0]] = n;
+      if (usage.inputs.size() != 1)
+        {
+          if ((unsigned) r[1] >= usage.inputs.size())
+            throw Processor_Error("Player number too high");
+          usage.inputs[r[1]][r[0]] = n;
+        }
       return int(n) >= 0;
     case USE_EDABIT:
       usage.edabits[{r[0], r[1]}] = n;
@@ -638,6 +648,7 @@ unsigned BaseInstruction::get_max_reg(int reg_type) const
   int offset = 0;
   int size_offset = 0;
   int size = this->size;
+  bool n_prefix = 0;
 
   // special treatment for instructions writing to different types
   switch (opcode)
@@ -663,6 +674,21 @@ unsigned BaseInstruction::get_max_reg(int reg_type) const
           return r[0] + size;
       else if (reg_type == CINT)
           return r[1] + size;
+      else
+          return 0;
+  case TRANS:
+      if (reg_type == SBIT)
+      {
+          int n_outputs = n;
+          auto& args = start;
+          int n_inputs = args.size() - n_outputs;
+          long long res = 0;
+          for (int i = 0; i < n_outputs; i++)
+              res = max(res, args[i] + DIV_CEIL(n_inputs, 64));
+          for (int j = 0; j < n_inputs; j++)
+              res = max(res, args[n_outputs] + DIV_CEIL(n_outputs, 64));
+          return res;
+      }
       else
           return 0;
   default:
@@ -708,25 +734,17 @@ unsigned BaseInstruction::get_max_reg(int reg_type) const
       offset = 1;
       size_offset = -1;
       break;
+  case ANDRSVEC:
+      n_prefix = 2;
+      break;
   case INPUTB:
       skip = 4;
       offset = 3;
       size_offset = -2;
       break;
   case INPUTBVEC:
-  {
-	  int res = 0;
-	  auto it = start.begin();
-	  while (it < start.end())
-	  {
-		  int n = *it - 3;
-		  it += 3;
-		  assert(it + n <= start.end());
-		  for (int i = 0; i < n; i++)
-			  res = max(res, *it++);
-	  }
-	  return res + 1;
-  }
+      n_prefix = 3;
+      break;
   case ANDM:
   case NOTS:
   case NOTCB:
@@ -770,6 +788,22 @@ unsigned BaseInstruction::get_max_reg(int reg_type) const
   case WRITESOCKETINT:
       size = n;
       break;
+  }
+
+  if (n_prefix > 0)
+  {
+      int res = 0;
+      auto it = start.begin();
+      while (it < start.end())
+      {
+          int n = *it - n_prefix;
+          int size = DIV_CEIL(*(it + 1), 64);
+          it += n_prefix;
+          assert(it + n <= start.end());
+          for (int i = 0; i < n; i++)
+              res = max(res, *it++ + size);
+      }
+      return res;
   }
 
   if (skip > 0)
@@ -990,6 +1024,7 @@ inline void Instruction::execute(Processor<sint, sgf2n>& Proc) const
         Proc.Procp.send_personal(start);
         return;
       case PRIVATEOUTPUT:
+        Proc.Procp.check();
         Proc.Procp.private_output(start);
         return;
       // Note: Fp version has different semantics for NOTC than GNOTC
@@ -1005,11 +1040,14 @@ inline void Instruction::execute(Processor<sint, sgf2n>& Proc) const
       case SHRSI:
         sint::shrsi(Procp, *this);
         return;
+      case GSHRSI:
+        sgf2n::shrsi(Proc2, *this);
+        return;
       case OPEN:
-        Proc.Procp.POpen(start, Proc.P, size);
+        Proc.Procp.POpen(*this);
         return;
       case GOPEN:
-        Proc.Proc2.POpen(start, Proc.P, size);
+        Proc.Proc2.POpen(*this);
         return;
       case MULS:
         Proc.Procp.muls(start, size);
@@ -1056,6 +1094,9 @@ inline void Instruction::execute(Processor<sint, sgf2n>& Proc) const
         return;
       case DELSHUFFLE:
         Proc.Procp.delete_shuffle(Proc.read_Ci(r[0]));
+        return;
+      case INVPERM:
+        Proc.Procp.inverse_permutation(*this);
         return;
       case CHECK:
         {
@@ -1293,7 +1334,12 @@ void Program::execute(Processor<sint, sgf2n>& Proc) const
       (void) start;
 
 #ifdef COUNT_INSTRUCTIONS
+#ifdef TIME_INSTRUCTIONS
+      RunningTimer timer;
+      int PC = Proc.PC;
+#else
       Proc.stats[p[Proc.PC].get_opcode()]++;
+#endif
 #endif
 
 #ifdef OUTPUT_INSTRUCTIONS
@@ -1322,6 +1368,10 @@ void Program::execute(Processor<sint, sgf2n>& Proc) const
         default:
           instruction.execute(Proc);
         }
+
+#if defined(COUNT_INSTRUCTIONS) and defined(TIME_INSTRUCTIONS)
+      Proc.stats[p[PC].get_opcode()] += timer.elapsed() * 1e9;
+#endif
     }
 }
 

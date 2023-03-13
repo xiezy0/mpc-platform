@@ -33,6 +33,9 @@ protected:
 public:
     int values_opened;
 
+    static void setup(Player&) {}
+    static void teardown() {}
+
     MAC_Check_Base(const typename T::mac_key_type::Scalar& mac_key = { }) :
             alphai(mac_key), values_opened(0) {}
     virtual ~MAC_Check_Base() {}
@@ -56,7 +59,7 @@ public:
     /// Initialize opening round
     virtual void init_open(const Player& P, int n = 0);
     /// Add value to be opened
-    virtual void prepare_open(const T& secret);
+    virtual void prepare_open(const T& secret, int n_bits = -1);
     /// Run opening protocol
     virtual void exchange(const Player& P) = 0;
     /// Get next opened value

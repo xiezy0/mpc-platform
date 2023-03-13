@@ -84,6 +84,7 @@ enum
     SUBSI = 0x2A,
     SUBCFI = 0x2B,
     SUBSFI = 0x2C,
+    PREFIXSUMS = 0x2D,
     // Multiplication/division/other arithmetic
     MULC = 0x30,
     MULM = 0x31,
@@ -113,6 +114,7 @@ enum
     GENSECSHUFFLE = 0xFB,
     APPLYSHUFFLE = 0xFC,
     DELSHUFFLE = 0xFD,
+    INVPERM = 0xFE,
     // Data access
     TRIPLE = 0x50,
     BIT = 0x51,
@@ -284,8 +286,9 @@ enum
     // Bitwise shifts
     GSHLCI = 0x182,
     GSHRCI = 0x183,
-    GBITDEC = 0x184,
-    GBITCOM = 0x185,
+    GSHRSI = 0x184,
+    GBITDEC = 0x18A,
+    GBITCOM = 0x18B,
     // Conversion
     GCONVINT = 0x1C0,
     GCONVGF2N = 0x1C1,

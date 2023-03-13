@@ -126,7 +126,8 @@ void thread_info<sint, sgf2n>::Sub_Main_Func()
       program = job.prognum;
       wait_timer.stop();
 #ifdef DEBUG_THREADS
-      printf("\tRunning program %d\n",program);
+      printf("\tRunning program %d/job %d in thread %d\n", program, job.type,
+          num);
 #endif
 
       if (program==-1)
@@ -208,6 +209,10 @@ void thread_info<sint, sgf2n>::Sub_Main_Func()
               *(vector<edabit<sint>>*) job.output, job.length, job.prognum,
               job.arg, Proc.Procp,
               job.begin, job.end, job.supply);
+#ifdef DEBUG_THREADS
+          printf("\tSignalling I have finished with job %d in thread %d\n",
+              job.type, num);
+#endif
           queues->finished(job);
         }
       else if (job.type == PERSONAL_TRIPLE_JOB)
@@ -268,6 +273,9 @@ void thread_info<sint, sgf2n>::Sub_Main_Func()
           // Execute the program
           progs[program].execute(Proc);
 
+          // make sure values used in other threads are safe
+          Proc.check();
+
           // prevent mangled output
           cout.flush();
 
@@ -279,7 +287,8 @@ void thread_info<sint, sgf2n>::Sub_Main_Func()
            }
 
 #ifdef DEBUG_THREADS
-          printf("\tSignalling I have finished\n");
+          printf("\tSignalling I have finished with program %d"
+              "in thread %d\n", program, num);
 #endif
           wait_timer.start();
           queues->finished(job, P.total_comm());
@@ -321,6 +330,8 @@ void thread_info<sint, sgf2n>::Sub_Main_Func()
 
   // wind down thread by thread
   machine.stats += Proc.stats;
+  // prevent faulty usage message
+  Proc.DataF.set_usage(actual_usage);
   delete processor;
 
   queues->finished(actual_usage, P.total_comm());

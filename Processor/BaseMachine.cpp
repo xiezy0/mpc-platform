@@ -6,6 +6,7 @@
 #include "BaseMachine.h"
 #include "OnlineOptions.h"
 #include "Math/Setup.h"
+#include "Tools/Bundle.h"
 
 #include <iostream>
 #include <sodium.h>
@@ -13,6 +14,7 @@ using namespace std;
 
 BaseMachine* BaseMachine::singleton = 0;
 thread_local int BaseMachine::thread_num;
+thread_local OnDemandOTTripleSetup BaseMachine::ot_setup;
 
 void print_usage(ostream& o, const char* name, size_t capacity)
 {
@@ -65,6 +67,14 @@ void BaseMachine::load_schedule(const string& progname, bool load_bytecode)
   string threadname;
   for (int i=0; i<nprogs; i++)
     { inpf >> threadname;
+      size_t split = threadname.find(":");
+      long expected = -1;
+      if (split != string::npos)
+        {
+          expected = atoi(threadname.substr(split + 1).c_str());
+          threadname = threadname.substr(0, split);
+        }
+
       string filename = "Programs/Bytecode/" + threadname + ".bc";
       bc_filenames.push_back(filename);
       if (load_bytecode)
@@ -72,8 +82,11 @@ void BaseMachine::load_schedule(const string& progname, bool load_bytecode)
 #ifdef DEBUG_FILES
           cerr << "Loading program " << i << " from " << filename << endl;
 #endif
-          load_program(threadname, filename);
+          long size = load_program(threadname, filename);
+          if (expected >= 0 and expected != size)
+            throw runtime_error("broken bytecode file");
         }
+
     }
 
   for (auto i : {1, 0, 0})
@@ -97,7 +110,8 @@ void BaseMachine::print_compiler()
     cerr << "Compiler: " << compiler << endl;
 }
 
-void BaseMachine::load_program(const string& threadname, const string& filename)
+size_t BaseMachine::load_program(const string& threadname,
+    const string& filename)
 {
   (void)threadname;
   (void)filename;
@@ -126,12 +140,12 @@ void BaseMachine::stop(int n)
 
 void BaseMachine::print_timers()
 {
-  cerr << "The following timing is ";
+  cerr << "The following benchmarks are ";
   if (OnlineOptions::singleton.live_prep)
     cerr << "in";
   else
     cerr << "ex";
-  cerr << "clusive preprocessing." << endl;
+  cerr << "cluding preprocessing (offline phase)." << endl;
   cerr << "Time = " << timer[0].elapsed() << " seconds " << endl;
   timer.erase(0);
   for (auto it = timer.begin(); it != timer.end(); it++)
@@ -195,4 +209,15 @@ void BaseMachine::set_thread_comm(const NamedCommStats& stats)
   auto queue = queues.at(BaseMachine::thread_num);
   assert(queue);
   queue->set_comm_stats(stats);
+}
+
+void BaseMachine::print_global_comm(Player& P, const NamedCommStats& stats)
+{
+  Bundle<octetStream> bundle(P);
+  bundle.mine.store(stats.sent);
+  P.Broadcast_Receive_no_stats(bundle);
+  size_t global = 0;
+  for (auto& os : bundle)
+    global += os.get_int(8);
+  cerr << "Global data sent = " << global / 1e6 << " MB (all parties)" << endl;
 }

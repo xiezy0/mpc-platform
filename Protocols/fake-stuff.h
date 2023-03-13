@@ -8,6 +8,7 @@ using namespace std;
 #include "Networking/Player.h"
 #include "Processor/Data_Files.h"
 #include "Math/Setup.h"
+#include "Tools/benchmarking.h"
 
 template<class T>
 void check_share(vector<T>& Sa, typename T::clear& value,
@@ -57,6 +58,7 @@ public:
       int thread_num = -1) :
       N(N), key(key)
   {
+    insecure_fake(false);
     outf = new ofstream[N];
     for (int i=0; i<N; i++)
       {
@@ -76,12 +78,12 @@ public:
     delete[] outf;
   }
   template<class U = T>
-  void output_shares(const typename U::clear& a)
+  void output_shares(const typename U::open_type& a)
   {
     output_shares<T>(a, key);
   }
   template<class U>
-  void output_shares(const typename U::clear& a,
+  void output_shares(const typename U::open_type& a,
       const typename U::mac_type& key)
   {
     vector<U> Sa(N);
