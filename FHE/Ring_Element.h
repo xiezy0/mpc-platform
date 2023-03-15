@@ -43,6 +43,8 @@ class Ring_Element
 
   public:
 
+  int n_mults() const { return element.size() - 1; }
+
   // Used to basically make sure *this is able to cope
   // with being assigned to by something of "type" e
   void partial_assign(const Ring_Element& e)

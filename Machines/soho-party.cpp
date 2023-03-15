@@ -12,7 +12,6 @@
 #include "GC/SemiPrep.h"
 
 #include "Processor/FieldMachine.hpp"
-#include "Protocols/HemiPrep.hpp"
 #include "Processor/Data_Files.hpp"
 #include "Processor/Instruction.hpp"
 #include "Processor/Machine.hpp"

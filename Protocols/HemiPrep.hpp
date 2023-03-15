@@ -102,7 +102,71 @@ void HemiPrep<T>::buffer_triples()
     b.randomize(G);
     c.mul(a, b);
     Bundle<octetStream> bundle(P);
-    pairwise_machine->pk.encrypt(a).pack(bundle.mine);
+    Ciphertext sendvalue = pairwise_machine->pk.encrypt(a);
+    
+    cout << "plaintext of ai: ";
+    for (unsigned int i = 0; i <= a.num_slots(); i++)
+    {
+        cout << a.element(i) << ",";
+    }
+    cout << "" << endl;
+    cout << "pk of Ciphtertext:" << endl;
+    cout << "value pk(a, b)-a : ";
+    for(int i = 0; i <= pairwise_machine->pk.a().n_mults(); i++)
+    {
+        for(int j = 0;j <= pairwise_machine->pk.a().get(i).n_mults(); j++)
+        {
+            for(int k = 0; k <= 2; k++)
+            {
+                cout << pairwise_machine->pk.a().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+    cout << "" << endl;
+
+    cout << "value pk(a, b)-b : ";
+    for(int i = 0; i <= pairwise_machine->pk.b().n_mults(); i++)
+    {
+        for(int j = 0; j <= pairwise_machine->pk.b().get(i).n_mults(); j++)
+        {
+            for(int k = 0; k <= 2; k++)
+            {
+                cout << pairwise_machine->pk.b().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+    cout << "" << endl;
+
+    cout << "send Ciphertext Enc(ai) to each party" << endl;
+    cout << "value ai-c0: ";
+    for (int i = 0; i <= sendvalue.c0().n_mults(); i++)
+    {
+        for (int j = 0; j <= sendvalue.c0().get(i).n_mults(); j++)
+        {
+            for (int k = 0; k <= 2; k++)
+            {
+                cout << sendvalue.c0().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+    cout << "" << endl;
+    cout << "value ai-c1: ";
+
+    for (int i = 0; i <= sendvalue.c1().n_mults(); i++)
+    {
+        for (int j = 0; j <= sendvalue.c1().get(i).n_mults(); j++)
+        {
+            for (int k = 0; k <= 2; k++)
+            {
+                cout << sendvalue.c1().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+    cout << "" << endl;
+    cout << "number of ai.c" << sendvalue.c0().n_mults() << endl;
+    cout << "number of ai.c.ring" << sendvalue.c0().get(0).n_mults() << endl;
+
+    sendvalue.pack(bundle.mine);
     P.unchecked_broadcast(bundle);
     Ciphertext C(pairwise_machine->pk);
     for (auto m : multipliers)

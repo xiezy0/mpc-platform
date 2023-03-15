@@ -26,6 +26,7 @@ PairwiseKeyInput<T>::PairwiseKeyInput(SubProcessor<T>* proc, PlayerBase& P) :
     {
         send_prngs.push_back({});
         to_send[i].append(send_prngs.back().get_seed(), SEED_SIZE);
+        cout << "send player " << i << ": " << to_send[i] << endl;
     }
     P.send_receive_all(to_send, to_receive);
     recv_prngs.resize(P.num_players());

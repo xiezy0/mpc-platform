@@ -57,6 +57,43 @@ void SohoPrep<T>::buffer_triples()
     Ca.pack(os);
     Cb.pack(os);
 
+    // 
+    for (unsigned int i = 0; i <= ai.num_slots(); i++)
+    {
+        cout  << "the slot" << i << " : " << ai.element(i) << endl;
+    }
+    //
+
+    
+    cout << "value Ca-c0: ";
+    for (int i = 0; i <= Ca.c0().n_mults(); i++)
+    {
+        for (int j = 0; j <= Ca.c0().get(i).n_mults(); j++)
+        {
+            for (int k = 0; k <= 2; k++)
+            {
+                cout << k << Ca.c0().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+    cout << "value Ca-c1: ";
+
+    for (int i = 0; i <= Ca.c1().n_mults(); i++)
+    {
+        for (int j = 0; j <= Ca.c1().get(i).n_mults(); j++)
+        {
+            for (int k = 0; k <= 2; k++)
+            {
+                cout << k << Ca.c1().get(i).get_element(j).get()[k] << ",";
+            }
+        }
+    }
+
+
+    cout << "number of Ca.c0" << Ca.c0().n_mults() << endl;
+    cout << "number of Ca.c0.ring" << Ca.c0().get(0).n_mults() << endl;
+    
+    
     for (int i = 1; i < proc->P.num_players(); i++)
     {
         proc->P.pass_around(os);
