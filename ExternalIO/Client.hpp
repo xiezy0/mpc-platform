@@ -111,6 +111,7 @@ vector<U> Client::receive_outputs(int n)
         {
             T value;
             value.unpack(os);
+            cout << "value" << j <<"get:" << value << endl;
             triples[j] += value;
         }
     }

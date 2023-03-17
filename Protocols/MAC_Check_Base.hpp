@@ -33,6 +33,8 @@ void MAC_Check_Base<T>::POpen(vector<typename T::open_type>& values,const vector
 {
     MAC_Check_Base<T>::POpen_Begin(values, S, P);
     MAC_Check_Base<T>::POpen_End(values, S, P);
+
+    cout << "final value size is :" << values.size() << endl;
 }
 
 template<class T>
@@ -55,18 +57,21 @@ void MAC_Check_Base<T>::init_open(const Player&, int n)
 template<class T>
 void MAC_Check_Base<T>::prepare_open(const T& secret, int)
 {
+    cout << "secret is :" << secrets.data() << endl;
     secrets.push_back(secret);
 }
 
 template<class T>
 typename T::clear MAC_Check_Base<T>::finalize_open()
 {
+    cout << " open open " << endl;
     return finalize_raw();
 }
 
 template<class T>
 typename T::open_type MAC_Check_Base<T>::finalize_raw()
 {
+    cout << "these values::" << values[0] << endl;
     return values.next();
 }
 

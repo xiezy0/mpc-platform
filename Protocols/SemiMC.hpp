@@ -28,6 +28,7 @@ void SemiMC<T>::prepare_open(const T& secret, int n_bits)
 template<class T>
 void SemiMC<T>::exchange(const Player& P)
 {
+    cout << "is there not come other" << endl;
     this->run(this->values, P);
 }
 
@@ -35,6 +36,7 @@ template<class T>
 void DirectSemiMC<T>::POpen_(vector<typename T::open_type>& values,
         const vector<T>& S, const PlayerBase& P)
 {
+    cout << "open open " << endl;
     this->values.clear();
     this->values.reserve(S.size());
     this->lengths.clear();
@@ -48,11 +50,18 @@ void DirectSemiMC<T>::POpen_(vector<typename T::open_type>& values,
 template<class T>
 void DirectSemiMC<T>::exchange_(const PlayerBase& P)
 {
+    cout << "start exchange" << endl;
     Bundle<octetStream> oss(P);
     oss.mine.reserve(this->values.size());
     assert(this->values.size() == this->lengths.size());
     for (size_t i = 0; i < this->lengths.size(); i++)
+    {
         this->values[i].pack(oss.mine, this->lengths[i]);
+        cout << "output" << i <<" value " << this->values[i] << endl;
+    }
+
+
+
     P.unchecked_broadcast(oss);
     size_t n = P.num_players();
     size_t me = P.my_num();
@@ -70,6 +79,7 @@ template<class T>
 void DirectSemiMC<T>::POpen_Begin(vector<typename T::open_type>& values,
         const vector<T>& S, const Player& P)
 {
+    cout << "start exchange popenbegin" << endl;
     values.clear();
     values.insert(values.begin(), S.begin(), S.end());
     octetStream os;
@@ -82,6 +92,7 @@ template<class T>
 void DirectSemiMC<T>::POpen_End(vector<typename T::open_type>& values,
         const vector<T>&, const Player& P)
 {
+    cout << "start exchange popenend" << endl;
     Bundle<octetStream> oss(P);
     P.receive_all(oss);
     direct_add_openings<typename T::open_type>(values, P, oss);

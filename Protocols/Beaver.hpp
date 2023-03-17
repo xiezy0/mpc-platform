@@ -47,6 +47,8 @@ void Beaver<T>::prepare_mul(const T& x, const T& y, int n)
     triples.push_back({{}});
     auto& triple = triples.back();
     triple = prep->get_triple(n);
+    cout << "beaver triple output x-a: " << x-triple[0] << endl;
+    cout << "beaver triple output y-b: " << y-triple[1] << endl;
     shares.push_back(x - triple[0]);
     shares.push_back(y - triple[1]);
     lengths.push_back(n);

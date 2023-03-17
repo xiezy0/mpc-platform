@@ -33,7 +33,7 @@ def start_mpc(meta_js, taskId):
                   '--ip-file-name ConfigFiles/IPConfig_%dp ' \
                   '-pn %d ' % (protocol, n_p, p, n_p, pn) \
                   + program_name
-        print(command)
+        dv.log.info(command)
         subprocess.run(command.split(' '))
     else:
         command = 'Scripts/%s.sh' % protocol + ' ' + program_name

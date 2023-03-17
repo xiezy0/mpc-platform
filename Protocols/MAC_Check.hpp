@@ -107,6 +107,11 @@ void Tree_MAC_Check<U>::exchange(const Player& P)
 {
   this->run(this->values, P);
 
+  for(int i = 0;i <= this->number();i++)
+  {
+      cout << "send player "<< i << " output share: " << this->values[i] << endl;
+  }
+  //cout << this->values
   this->values_opened += this->values.size();
 
   popen_cnt += this->values.size();
@@ -363,8 +368,11 @@ void direct_add_openings(vector<T>& values, const PlayerBase& P, vector<octetStr
   assert(os.size() == n);
   for (auto& value : values)
     for (size_t j = 0; j < n; j++)
-      if (j != me)
-        value += os[j].get<T>();
+      if (j != me){
+          cout << "come here" << value << endl;
+          value += os[j].get<T>();
+      }
+
 }
 
 template<class T>

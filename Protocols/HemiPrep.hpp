@@ -151,7 +151,6 @@ void HemiPrep<T>::buffer_triples()
     }
     cout << "" << endl;
     cout << "value ai-c1: ";
-
     for (int i = 0; i <= sendvalue.c1().n_mults(); i++)
     {
         for (int j = 0; j <= sendvalue.c1().get(i).n_mults(); j++)
