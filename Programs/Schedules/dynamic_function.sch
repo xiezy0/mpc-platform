@@ -1,8 +1,8 @@
 1
 1
-dynamic_function-0:2008
+dynamic_function-0:9073
 1 0
 0
-start_server.py
-lgp:106
-opts: trunc_pr edabit
+/Users/xiumaker/Documents/mpc/mpc-platform/start_server.py --port 8103
+R:64
+opts: 

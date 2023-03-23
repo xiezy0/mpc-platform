@@ -404,6 +404,7 @@ class DynamicVariables(object):
                     result = self.ai_function_map[sfunc["function"]](vars, meta_para)
                     step_results_ai[self.ai_module_dict[module]] = result
                     count_ai += 1
+                    # todo: step_result_ai -> result, there is the bug of svc
                     self.res_ai = step_results_ai
                 else:
                     raise ValueError("NOW ONLY 'SVC' IS SUPPORTED")
@@ -681,7 +682,45 @@ class DynamicVariables(object):
 
     @staticmethod
     def calc_svc(var,meta):
+        #print_ln('s', var.reveal_nested())
+        # party0 = sfix.Matrix(3, 5)
+        # party1 = sfix.Matrix(2, 5)
+        # party2 = sfix.Array(5)
+
+        # @for_range_opt(3)
+        # def _(i):
+        #     for j in range(5):
+        #         party0[i][j] = sfix.get_input_from(j)
+        #
+        # @for_range_opt(2)
+        # def _(i):
+        #     for j in range(5):
+        #         party1[i][j] = sfix.get_input_from(j)
+        #
+        # # @for_range(5)
+        # # def f(i):
+        # party2[0] = 0
+        # party2[1] = 1
+        # party2[2] = 0
+        # party2[3] = 0
+        # party2[4] = 0
+
+        # todo: input redefine, dont use static
+        # var = sfix.Matrix(6, 5)
+        # @for_range_opt(5)
+        # def _(i):
+        #     for j in range(5):
+        #         var[i][j] = sfix(j)
+        #
+        # var[5][0] = sfix(0)
+        # var[5][1] = sfix(1)
+        # var[5][2] = sfix(0)
+        # var[5][3] = sfix(0)
+        # var[5][4] = sfix(0)
+        # print_ln('%s', var.reveal_nested())
+
         res = svc(var, meta)
+
         return res
 
 

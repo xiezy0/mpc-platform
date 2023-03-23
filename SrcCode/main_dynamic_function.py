@@ -8,7 +8,7 @@ import subprocess
 def start_mpc(meta_js, taskId):
     opts = defaults()
     # Set the finite ring parameter gfr(2^128), namely increase more numbers.
-    # opts.ring = 128
+    opts.ring = 128
     program_name = 'dynamic_function'
     prog = Program([program_name], opts)
     # Literally set precision but with unconfirmed result

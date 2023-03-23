@@ -42,11 +42,12 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='RESTFUL SERVER FOR JIT MPC PLATFORM')
     parser.add_argument('-c', '--conf', default="./conf/conf.yaml", dest="conf", help="yaml file with server configuration")
+    parser.add_argument('--port', type=int, default=8101)
     args = parser.parse_args()
 
     conf = parse_yaml(args.conf)
     IP = conf.get("IP", settings.IP)
-    PORT = conf.get("PORT", settings.PORT)
+    PORT = conf.get("IP", args.port)
     
    
     settings.MAX_TIME = conf.get("MAX_TIME", settings.MAX_TIME) 
